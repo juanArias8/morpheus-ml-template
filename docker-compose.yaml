@@ -1,0 +1,107 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:15-alpine
+    env_file:
+      - server/secrets.env
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4
+    env_file:
+      - server/secrets.env
+    ports:
+      - "8002:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  server:
+    build:
+      context: server
+      dockerfile: ./Dockerfile
+      args:
+        - TAG=${TAG:-latest}
+    image: server:latest
+    env_file:
+      - server/secrets.env
+    command: python3 main.py
+    volumes:
+      - ./server:/opt/api
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "8001:8001"
+    stdin_open: true
+    tty: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: ./Dockerfile
+    image: frontend:latest
+    entrypoint: ./bin/entrypoint.sh
+    volumes:
+      - ./temp-frontend:/app
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+
+  worker-ray:
+    build:
+      context: ./worker
+    # If you are using a mac, uncomment the args below
+    # args:
+    #   RAY_IMAGE_TAG: latest-gpu-aarch64
+    image: worker:latest
+    env_file:
+      - worker/secrets.env
+    command: bash start.sh
+    ports:
+      - "8000:8000"
+      - "8265:8265"
+    volumes:
+      - sd_model:/mnt/
+    depends_on:
+      server:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "ray status" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # If you don't have a gpu, comment the deploy section below
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - count: 1
+              capabilities: [ gpu ]
+
+  worker-ray-deployer:
+    image: worker:latest
+    command: bash -c "sleep 10 && ray job submit -- serve deploy models.yaml"
+    environment:
+      - RAY_ADDRESS=http://worker-ray:8265
+    depends_on:
+      worker-ray:
+        condition: service_healthy
+
+volumes:
+  pg_data:
+  sd_model:
+    name: "models"
