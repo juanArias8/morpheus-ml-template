@@ -4,9 +4,10 @@ export interface CircleLoaderProps {
 
 const CircleLoader = (props: CircleLoaderProps) => {
   return props.isLoading ? (
-    <span className="loading loading-spinner loading-lg">
-      <span className="text-5xl">Loading...</span>
-    </span>
+    <div className="flex items-center">
+      <span className="loading loading-ring loading-lg text-primary" />
+      <span className="ml-2 text-xl">Loading...</span>
+    </div>
   ) : null;
 };
 

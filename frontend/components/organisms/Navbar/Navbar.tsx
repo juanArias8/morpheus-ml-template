@@ -16,43 +16,53 @@ const Navbar = () => {
   };
 
   return (
-    <div className="navbar bg-base-100 border-primary flex flex-row justify-between border-b-2">
+    <div className="navbar border-primary flex flex-row justify-between hover:border-b">
       <div className="navbar-start">
         <a className="btn btn-ghost text-xl normal-case">
-          <Brand onClick={redirectToHome} styles={{ fontSize: "20px" }} />
+          <Brand
+            short={false}
+            onClick={redirectToHome}
+            styles={{ fontSize: "20px" }}
+          />
         </a>
       </div>
 
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
           <li>
-            <Link href={"/diffusion"}>Image Generation</Link>
+            <Link className="hover:text-accent" href={"/diffusion"}>
+              Image Generation
+            </Link>
           </li>
           <li>
-            <Link href={"/chatbot"}>Text Generation</Link>
+            <Link className="hover:text-accent" href={"/chatbot"}>
+              Text Generation
+            </Link>
           </li>
           <li>
-            <Link href={"/storytelling"}>Story Telling</Link>
+            <Link className="hover:text-accent" href={"/storytelling"}>
+              Story Telling
+            </Link>
           </li>
         </ul>
       </div>
 
       <div className="navbar-end">
         <div className="dropdown dropdown-end">
-          <label
+          <div
             tabIndex={0}
-            className="btn btn-ghost btn-circle avatar hover:border-1 hover:border-primary p-1"
+            className="btn btn-ghost btn-circle avatar hover:border-1 hover:border-primary"
           >
-            <div className="w-15 rounded-full">
+            <div className="ring-primary ring-offset-base-100 rounded-full ring ring-offset-2">
               <Image
                 src={"/favicon/android-chrome-192x192.png"}
                 alt={"Morpheus logo"}
-                width={200}
-                height={200}
+                width={100}
+                height={100}
                 className={"rounded-full object-contain"}
               />
             </div>
-          </label>
+          </div>
           <ul
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"

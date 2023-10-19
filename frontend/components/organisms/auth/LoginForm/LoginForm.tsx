@@ -40,7 +40,7 @@ export const LoginForm = () => {
 
   return (
     <div className={"w-full"}>
-      <h1 className="mt-[100px] text-center text-2xl">Login Form</h1>
+      <h1 className="mt-[48px] text-center text-2xl">Login Form</h1>
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-2">
         <TextInput

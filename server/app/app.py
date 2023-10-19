@@ -47,7 +47,7 @@ async def startup_db():
 
 app.include_router(AuthRouter, tags=["auth"], prefix="/auth")
 app.include_router(UserRouter, tags=["users"], prefix="/users")
-app.include_router(GenerationRouter, tags=["stable diffusion"], prefix="/generation")
+app.include_router(GenerationRouter, tags=["Generative AI"], prefix="/generation")
 app.include_router(ModelsRouter, tags=["models"], prefix="/models")
 app.include_router(SamplersRouter, tags=["samplers"], prefix="/samplers")
 

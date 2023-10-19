@@ -3,7 +3,7 @@ import { Auth } from "@/components/organisms/auth/Auth";
 
 const Home = () => {
   return (
-    <div className="h-screen w-full p-10">
+    <div className="h-screen w-full">
       <Auth />
     </div>
   );

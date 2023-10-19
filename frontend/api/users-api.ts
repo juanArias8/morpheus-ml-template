@@ -1,5 +1,5 @@
 import axiosClient from "@/lib/axiosClient";
-import { signOutFirebase } from "@/components/organisms/auth/auth-api";
+import { signOutFirebase } from "@/api/auth-api";
 import { ErrorResponse, SuccessResponse, User } from "@/lib/models";
 
 export const logout = () => {

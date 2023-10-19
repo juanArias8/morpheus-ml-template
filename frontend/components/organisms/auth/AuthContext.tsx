@@ -14,9 +14,9 @@ import {
   loginWithEmailAndPasswordFirebase,
   sendUserPasswordResetEmail,
   signOutFirebase,
-} from "@/components/organisms/auth/auth-api";
+} from "@/api/auth-api";
 import { useLocalStorage } from "usehooks-ts";
-import { getUserInfo } from "@/components/organisms/auth/users";
+import { getUserInfo } from "@/api/users-api";
 
 export enum AuthOption {
   Login = "login",

@@ -1,19 +1,15 @@
 import React, { CSSProperties } from "react";
-import styles from "./Brand.module.scss";
 
 interface BrandProps {
   onClick?: () => void;
   styles?: CSSProperties;
+  short?: boolean;
 }
 
-const Brand = (props: BrandProps) => {
+const Brand = ({ onClick, styles, short = true }: BrandProps) => {
   return (
-    <h2
-      onClick={props.onClick}
-      className={`text-5xl ${styles.morpheusTitle}`}
-      style={props.styles}
-    >
-      Morpheus ML Template
+    <h2 onClick={onClick} className={`text-5xl ${styles}`} style={styles}>
+      Morpheus {!short && "ML Template"}
     </h2>
   );
 };

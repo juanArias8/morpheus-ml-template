@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { getOrRefreshFirebaseToken } from "@/lib/firebaseClient";
-import { logout } from "@/components/organisms/auth/auth-api";
+import { logout } from "@/api/auth-api";
 
 const axiosClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
