@@ -17,12 +17,21 @@ class Settings(BaseSettings):
     # huggingface.co API token
     hf_api_key: str
 
-    # Models config
+    # Model config
+    models_folder: str = "/mnt/"
+
+    # Image generation default config
     default_scheduler: str = "DDPMScheduler"
     default_pipeline: str = "StableDiffusionXLPipeline"
     default_model: str = "stabilityai/stable-diffusion-xl-base-1.0"
     enable_float32: bool = False
     enable_attention_slicing: bool = True
+
+    # Text generation default config
+    default_model_handler: str = "chat_glm"
+    default_text_pipeline: str = "text-generation"
+
+    # Text generation default config
 
     def get_db_url(self) -> str:
         return PostgresDsn.build(

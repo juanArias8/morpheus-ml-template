@@ -12,7 +12,7 @@ from app.settings.settings import get_settings
 settings = get_settings()
 
 
-@ray.remote(resources={"WorkerCpu": 1})
+@ray.remote(num_gpus=1)
 class StableDiffusionMagicPrompt:
     def __init__(self, model_id: str = "Gustavosta/MagicPrompt-Stable-Diffusion"):
         self.logger = logging.getLogger("ray")

@@ -1,10 +1,11 @@
 from typing import List, Union
 
-from sqlalchemy.orm import Session
-
 from app.models.schemas import User
 from app.repository.firebase_repository import FirebaseRepository
 from app.repository.user_repository import UserRepository
+from sqlalchemy.orm import Session
+
+from app.error.user import UserIsNotOwnerError, UserNotFoundError
 
 
 class UserService:
@@ -24,20 +25,24 @@ class UserService:
         return self.user_repository.get_users(db=db)
 
     async def get_user_by_email(self, *, db: Session, email: str, request_email: str) -> User:
-        return self.validate_user(db=db, email=email, request_email=request_email)
+        user = self.get_and_validate_user(db=db, email=email, request_email=request_email)
+        return user
 
     async def update_user(self, *, db: Session, user: User, request_email: str) -> User:
-        self.validate_user(db=db, email=user.email, request_email=request_email)
+        self.get_and_validate_user(db=db, email=user.email, request_email=request_email)
         return self.user_repository.update_user(db=db, user=user)
 
     async def delete_user(self, *, db: Session, email: str, request_email: str) -> bool:
-        self.validate_user(db=db, email=email, request_email=request_email)
+        self.get_and_validate_user(db=db, email=email, request_email=request_email)
         removed_user = self.user_repository.delete_user(db=db, email=email)
         if removed_user:
             self.firebase_repository.remove_firebase_user(email=email)
         return True
 
-    def validate_user(self, *, db: Session, email: str, request_email: str):
+    def get_and_validate_user(self, *, db: Session, email: str, request_email: str):
         if email != request_email:
-            raise ValueError(f"User with email {request_email} is not the owner of the resource")
-        return self.user_repository.get_user_data(db=db, email=email)
+            raise UserIsNotOwnerError(f"User with email {request_email} is not the owner of the resource")
+        user = self.user_repository.get_user_data(db=db, email=email)
+        if not user:
+            raise UserNotFoundError(f"User with email {request_email} not found")
+        return user

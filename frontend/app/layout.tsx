@@ -1,22 +1,30 @@
+"use client";
+
 import { ReactNode } from "react";
-import type { Metadata } from "next";
-import { AuthProvider } from "@/components/organisms/auth/AuthContext";
+import { AuthProvider } from "@/components/organisms/Auth/AuthContext";
 import { AlertMessageProvider } from "@/components/organisms/AlertMessage/AlertMessageContext";
 import Navbar from "@/components/organisms/Navbar/Navbar";
-import Footer from "@/components/molecules/Footer/Footer";
+import Footer from "@/components/molecules/Footer";
 import AlertMessage from "@/components/organisms/AlertMessage/AlertMessage";
+import { usePathname } from "next/navigation";
 import "./globals.css";
-
-export const metadata: Metadata = {
-  title: "Morpheus ML template",
-  description: "Template for Monadical ML projects",
-};
 
 interface RootLayoutProps {
   children: ReactNode;
 }
 
+const pagesWithFooter = [
+  "/",
+  "/about",
+  "/profile",
+  "/terms-of-service",
+  "/privacy-policy",
+];
+
 export default function RootLayout(props: RootLayoutProps) {
+  const pathName = usePathname();
+  const showFooter = pagesWithFooter.includes(pathName);
+
   return (
     <html lang="en" data-theme={"dark"}>
       <body className={"relative"}>
@@ -24,7 +32,7 @@ export default function RootLayout(props: RootLayoutProps) {
           <AuthProvider>
             <Navbar />
             <main>{props.children}</main>
-            <Footer />
+            <Footer showFooter={showFooter} />
             <AlertMessage />
           </AuthProvider>
         </AlertMessageProvider>

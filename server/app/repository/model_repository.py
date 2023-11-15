@@ -35,6 +35,10 @@ class ModelRepository:
         return db.query(MLModel).filter(MLModel.category.id == category_id).all()
 
     @classmethod
+    def get_model_by_source(cls, *, db: Session, model_source: str) -> MLModel:
+        return db.query(MLModel).filter(MLModel.name == model_source).first()
+
+    @classmethod
     def get_model_by_name(cls, *, db: Session, model_name: str) -> MLModel:
         return db.query(MLModel).filter(MLModel.name == model_name).first()
 

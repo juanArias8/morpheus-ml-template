@@ -11,3 +11,32 @@
     font-family: "Poppins", sans-serif;
 }
 
+
+@layer components {
+    .navbar-gradient {
+        background: #1d232a;
+        background: radial-gradient(circle at 50%, rgba(100, 25, 230, 0.2), rgba(100, 25, 230, 0.01));
+    }
+
+    .button-radial-gradient {
+        background: #1d232a;
+        background: radial-gradient(circle at 50%, rgba(100, 25, 230, 0.3), rgba(100, 25, 230, 0.5));
+    }
+
+    .bg-gradient-dark {
+        @apply bg-base-200/80 bg-gradient-to-br from-primary/10 via-10% via-primary/5 via-30%
+        via-accent/5 via-70% to-accent/10;
+    }
+
+    .bg-gradient-base-200 {
+        @apply bg-gradient-to-r from-base-200/40 to-base-200/30;
+    }
+
+    .main-section {
+        @apply flex flex-col min-w-[320px] p-5 pb-10 bg-neutral overflow-y-auto xl:p-24 xl:h-[92vh] xl:pb-[250px];
+    }
+
+    .btn-primary {
+        @apply button-radial-gradient ;
+    }
+}

@@ -6,3 +6,13 @@ class UserNotFoundError(Exception):
 
     def __str__(self):
         return self.msg
+
+
+class UserIsNotOwnerError(Exception):
+    """ Raised when a user is not the owner of a resource """
+
+    def __init__(self, msg=None):
+        self.msg = msg if msg else "The user is not the owner of the resource."
+
+    def __str__(self):
+        return self.msg

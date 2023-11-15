@@ -1,6 +1,11 @@
 import axiosClient from "@/lib/axiosClient";
 import { signOutFirebase } from "@/api/auth-api";
-import { ErrorResponse, SuccessResponse, User } from "@/lib/models";
+import {
+  APIResponse,
+  ErrorResponse,
+  SuccessResponse,
+  User,
+} from "@/lib/models";
 
 export const logout = () => {
   return signOutFirebase()
@@ -17,54 +22,52 @@ export const logout = () => {
     });
 };
 
-export const getUserInfo = async (email: string) => {
+export const getUserInfo = async (email: string): Promise<APIResponse> => {
   try {
-    // const response = await axiosClient.get(`users/email/${email}`);
-    // if (response.status === 200 && response.data.email) {
-    //   return SuccessResponse(response.data);
-    // }
-    // return ErrorResponse("User not found");
-    return SuccessResponse({
-      email: "juasda96@gmail.com",
-      name: "Juan David Arias",
-    });
+    const response = await axiosClient.get(`users/email/${email}`);
+    return SuccessResponse(response.data);
   } catch (error: any) {
-    return ErrorResponse(String(error));
+    return ErrorResponse(
+      error?.response?.data?.detail ||
+        "Something went wrong while getting user",
+    );
   }
 };
 
-export const loadOrCreateUserInfo = async (user: User) => {
+export const loadOrCreateUserInfo = async (
+  user: User,
+): Promise<APIResponse> => {
   try {
     const response = await axiosClient.post(`users`, user);
-    if (response.status === 200 && response.data.email) {
-      return SuccessResponse(response.data);
-    }
-    return ErrorResponse("Error loading user");
+    return SuccessResponse(response.data);
   } catch (error: any) {
-    return ErrorResponse(String(error));
+    return ErrorResponse(
+      error?.response?.data?.detail ||
+        "Something went wrong while creating user",
+    );
   }
 };
 
-export const updateUserInfo = async (user: User) => {
+export const updateUserInfo = async (user: User): Promise<APIResponse> => {
   try {
     const response = await axiosClient.put(`users`, user);
-    if (response.status === 200 && response.data.email) {
-      return SuccessResponse(response.data);
-    }
-    return ErrorResponse("Error updating user");
+    return SuccessResponse(response.data);
   } catch (error: any) {
-    return ErrorResponse(String(error));
+    return ErrorResponse(
+      error?.response?.data?.detail ||
+        "Something went wrong while updating user",
+    );
   }
 };
 
-export const removeUserInfo = async (email: string) => {
+export const removeUserInfo = async (email: string): Promise<APIResponse> => {
   try {
     const response = await axiosClient.delete(`users/${email}`);
-    if (response.status === 200 && response.data.email) {
-      return SuccessResponse(response.data);
-    }
-    return ErrorResponse("Error removing user");
+    return SuccessResponse(response.data);
   } catch (error: any) {
-    return ErrorResponse(String(error));
+    return ErrorResponse(
+      error?.response?.data?.detail ||
+        "Something went wrong while removing user",
+    );
   }
 };

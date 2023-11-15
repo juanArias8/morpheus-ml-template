@@ -1,9 +1,12 @@
+from typing import Union
+
 from sqlalchemy.orm import Session
 
 from app.error.generation import GenerationNotFoundError
 from app.error.model import ModelNotFoundError
+from app.error.user import UserNotFoundError
 from app.integrations.ray_ai_client import RayAIClient
-from app.models.schemas import ImageGenerationRequest
+from app.models.schemas import ImageGenerationRequest, TextGenerationRequest
 from app.repository.generation_repository import GenerationRepository
 from app.repository.model_repository import ModelRepository
 from app.repository.user_repository import UserRepository
@@ -23,38 +26,60 @@ class GenerationServices:
         return generation
 
     def generate_text2img_images(self, db: Session, request: ImageGenerationRequest, email: str) -> str:
-        backend_request = self._build_backend_request(db=db, request=request, email=email)
+        backend_request = self._build_ray_image_request(db=db, request=request, email=email)
         return self.generator.generate_text2img_images(request=backend_request)
 
     def generate_img2img_images(self, db: Session, request: ImageGenerationRequest, image: bytes, email: str) -> str:
-        backend_request = self._build_backend_request(db=db, request=request, email=email)
+        backend_request = self._build_ray_image_request(db=db, request=request, email=email)
         return self.generator.generate_img2img_images(request=backend_request, image=image)
 
-    def generate_inpainting_images(self, db: Session, request: ImageGenerationRequest, image: bytes, mask: bytes,
-                                   email: str) -> str:
-        backend_request = self._build_backend_request(db=db, request=request, email=email)
+    def generate_inpainting_images(
+            self, db: Session,
+            request: ImageGenerationRequest,
+            image: bytes,
+            mask: bytes,
+            email: str
+    ) -> str:
+        backend_request = self._build_ray_image_request(db=db, request=request, email=email)
         return self.generator.generate_inpainting_images(request=backend_request, image=image, mask=mask)
 
-    def _validate_request(self, db: Session, model: str = None) -> None:
-        db_model = self.model_repository.get_model_by_name(db=db, model_source=model)
-        if not db_model:
-            raise ModelNotFoundError(f"model {model} does not exist in db")
+    def generate_text_with_chatbot(self, db: Session, request: TextGenerationRequest, email: str) -> str:
+        backend_request = self._build_ray_text_request(db=db, request=request, email=email)
+        return self.generator.generate_text_with_chatbot(request=backend_request)
 
-    def _build_backend_request(
+    def _get_user_and_model(self, db: Session, model_name: str, email: str):
+        db_user = self.user_repository.get_user_by_email(db=db, email=email)
+        if not db_user:
+            raise UserNotFoundError(f"user {email} does not exist in db")
+
+        db_model = self.model_repository.get_model_by_name(db=db, model_name=model_name)
+        if not db_model:
+            raise ModelNotFoundError(f"model {model_name} does not exist in db")
+        return db_user, db_model
+
+    def _build_ray_image_request(
             self,
             db: Session,
-            request: ImageGenerationRequest,
+            request: Union[ImageGenerationRequest],
             email: str
     ) -> ImageGenerationRequest:
-        self._validate_request(db=db, model=request.model_id)
-        pipeline = hasattr(request, "pipeline") and request.pipeline or "StableDiffusionPipeline"
+        db_user, db_model = self._get_user_and_model(db=db, model_name=request.model_name, email=email)
         request_dict = {
             **request.dict(),
-            "user_id": email,
-            "pipeline": pipeline,
-            "sampler": request.sampler,
-            "model_id": request.model_id,
+            "user_id": db_user.id,
+            "pipeline": db_model.pipeline,
+            "scheduler": request.sampler,
+            "model_source": db_model.source,
+        }
+        backend_request = ImageGenerationRequest(**request_dict)
+        return backend_request
+
+    def _build_ray_text_request(self, db: Session, request: TextGenerationRequest, email: str) -> TextGenerationRequest:
+        db_user, db_model = self._get_user_and_model(db=db, model_name=request.model_name, email=email)
+        request_dict = {
+            **request.dict(),
+            "user_id": db_user.id,
         }
 
-        backend_request = ImageGenerationRequest(**request_dict)
+        backend_request = TextGenerationRequest(**request_dict)
         return backend_request

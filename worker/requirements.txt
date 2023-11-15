@@ -24,6 +24,7 @@ opencv-contrib-python-headless
 
 # Text generation
 dynamicprompts[attentiongrabber,magicprompt]
+sentencepiece
 
 # Hugging face
 huggingface_hub

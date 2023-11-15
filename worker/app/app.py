@@ -38,7 +38,7 @@ class APIIngress:
             request: ImageGenerationRequest = Depends()
     ):
         try:
-            self.logger.info(f"StableDiffusionText2Img.generate: request: {request}")
+            self.logger.info(f"generate_text2img request: {request}")
             request.task_id = str(uuid.uuid4())
             model_request = ModelRequest(**request.dict())
             handler = ImageModelHandler.remote(endpoint=CategoryEnum.TEXT_TO_IMAGE, request=model_request)
@@ -56,7 +56,7 @@ class APIIngress:
             request: ImageGenerationRequest = Depends(),
     ):
         try:
-            self.logger.info(f"StableDiffusionImg2Img.generate: request: {request}")
+            self.logger.info(f"generate_img2img request: {request}")
             request.task_id = str(uuid.uuid4())
             model_request = ModelRequest(**request.dict())
             model_request.image = await image.read()
@@ -76,7 +76,7 @@ class APIIngress:
             request: ImageGenerationRequest = Depends(),
     ):
         try:
-            self.logger.info(f"StableDiffusionInpainting.generate: request: {request}")
+            self.logger.info(f"generate_inpainting request: {request}")
             request.task_id = str(uuid.uuid4())
             model_request = ModelRequest(**request.dict())
             model_request.image = await image.read()
@@ -89,36 +89,20 @@ class APIIngress:
             self.logger.error(f"Error in generate_inpainting {error_str}")
             return Response(content=error_str)
 
-    @app.post(f"/{TextCategoryEnum.MAGIC_PROMPT}")
-    async def generate_magic_prompt(
+    @app.post(f"/text")
+    async def generate_text(
             self,
             request: TextGenerationRequest = Depends(),
     ):
         try:
-            self.logger.info(f"StableDiffusionMagicPrompt.generate: request: {request}")
+            self.logger.info(f"generate_text request: {request}")
             request.task_id = str(uuid.uuid4())
-            handler = TextModelHandler.remote(endpoint=TextCategoryEnum.MAGIC_PROMPT)
+            handler = TextModelHandler.remote(handler=request.handler)
             handler.handle_generation.remote(request=request)
             return Response(content=request.task_id)
         except Exception as e:
             error_str = str(e)
-            self.logger.error(f"Error in generate_magic_prompt {error_str}")
-            return Response(content=error_str)
-
-    @app.post(f"/{TextCategoryEnum.LLAMA2}")
-    async def generate_llama2(
-            self,
-            request: TextGenerationRequest = Depends(),
-    ):
-        try:
-            self.logger.info(f"Llama2TextGeneration.generate: request: {request}")
-            request.task_id = str(uuid.uuid4())
-            handler = TextModelHandler.remote(endpoint=TextCategoryEnum.LLAMA2)
-            handler.handle_generation.remote(request=request)
-            return Response(content=request.task_id)
-        except Exception as e:
-            error_str = str(e)
-            self.logger.error(f"Error in generate_magic_prompt {error_str}")
+            self.logger.error(f"Error in generate_text {error_str}")
             return Response(content=error_str)
 
     @app.get("/pending-tasks")

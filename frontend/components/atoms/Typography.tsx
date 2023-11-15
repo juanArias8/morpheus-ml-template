@@ -16,6 +16,8 @@ export enum TypographyColor {
   Info = "text-info",
   Warning = "text-warning",
   Danger = "text-danger",
+  White = "text-white",
+  Black = "text-black",
 }
 
 export enum TypographyAlignment {

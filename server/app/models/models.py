@@ -1,11 +1,10 @@
 import uuid
 
+from app.config.database.database import Base
 from sqlalchemy import ARRAY, DateTime, Enum, Column, String, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
-from app.config.database.database import Base
 
 
 class BaseModel(Base):
@@ -55,7 +54,7 @@ class MLModel(BaseModel):
     __tablename__ = "ml_model"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(64))
+    name = Column(String(64), nullable=False, unique=True)
     source = Column(String(512))
     description = Column(String(512), nullable=True)
     url_docs = Column(String(512), nullable=True)
@@ -83,3 +82,10 @@ class Sampler(BaseModel):
     key = Column(String(64))
     name = Column(String(64))
     description = Column(String(512), nullable=True)
+
+
+class Newsletter(BaseModel):
+    __tablename__ = "newsletter"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(64), unique=True, index=True)

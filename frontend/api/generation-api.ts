@@ -11,47 +11,66 @@ export const generateImageWithText2Img = async (request: any) => {
       {},
       {
         params: { ...request },
-      }
+      },
     );
     return SuccessResponse(response.data);
-  } catch (error) {
-    return ErrorResponse(String(error));
+  } catch (error: any) {
+    return ErrorResponse(
+      error?.response?.data?.detail ||
+        "Something went wrong while generating image",
+    );
   }
 };
 
 export const generateTextWithChatBot = async (request: any) => {
+  console.log("request", request);
   try {
     const response = await axiosClient.post(
       `/generation/text`,
       {},
       {
         params: { ...request },
-      }
+      },
     );
     return SuccessResponse(response.data);
-  } catch (error) {
-    return ErrorResponse(String(error));
+  } catch (error: any) {
+    return ErrorResponse(
+      error?.response?.data?.detail ||
+        "Something went wrong while generating text",
+    );
   }
 };
 
-export const fetchTaskResult = async (taskId: string) => {
+export const getGenerationResult = async (
+  taskId: string,
+  retryCount: number = 0,
+  maxCount: number = MAX_RETRY_COUNT,
+): Promise<any> => {
+  if (!taskId) return ErrorResponse("Task id is required");
+  return await fetchDataWithRetry(taskId, retryCount, maxCount);
+};
+
+const fetchTaskResult = async (taskId: string) => {
   try {
     const response = await axiosClient.get(`/generation/results/${taskId}`);
-    return response.data;
-  } catch (error) {
-    return ErrorResponse(String(error));
+    return SuccessResponse(response.data);
+  } catch (error: any) {
+    return ErrorResponse(
+      error?.response?.data?.detail ||
+        "Something went wrong while fetching task result",
+    );
   }
 };
 
-export const fetchDataWithRetry = async (
+const fetchDataWithRetry = async (
   taskId: string,
   retryCount: number,
-  maxCount: number = MAX_RETRY_COUNT
+  maxCount: number = MAX_RETRY_COUNT,
 ): Promise<any> => {
   await sleep(5000);
   if (retryCount > maxCount) {
     return ErrorResponse(
-      "Failed to fetch results from server after maximum retries exceeded"
+      "Failed to fetch results from server after maximum retries exceeded",
     );
   }
 
@@ -59,6 +78,7 @@ export const fetchDataWithRetry = async (
     await sleep(mapCounterToSleepTime(retryCount));
     const response = await fetchTaskResult(taskId);
     if (!response.success) return ErrorResponse(response.message);
+    if (!response.data) return ErrorResponse("No data found");
     if (response.data.status === "FAILED") {
       return ErrorResponse(response.data.message);
     } else if (response.data.status === "COMPLETED") {
@@ -68,9 +88,9 @@ export const fetchDataWithRetry = async (
     } else {
       return fetchDataWithRetry(taskId, retryCount + 1, maxCount);
     }
-  } catch (error) {
+  } catch (error: any) {
     if (retryCount === maxCount) {
-      return ErrorResponse("Failed to fetch results from server");
+      return ErrorResponse(error.message);
     }
     await sleep(mapCounterToSleepTime(retryCount));
     return fetchDataWithRetry(taskId, retryCount + 1, maxCount);

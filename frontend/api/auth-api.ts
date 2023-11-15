@@ -1,113 +1,87 @@
 import {
   createUserWithEmailAndPassword,
-  getAdditionalUserInfo,
   GoogleAuthProvider,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  User,
   UserCredential,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseClient";
 
+const AUTH_ERROR = "Something went wrong with your authentication process";
+
 export const signUpWithEmailAndPasswordFirebase = async (
-  user: any
-): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    createUserWithEmailAndPassword(auth, user.email, user.password)
-      .then((userCredential: UserCredential) => {
-        resolve(userCredential.user);
-      })
-      .catch((error: { code: string | number }) => {
-        reject(
-          new Error(
-            mapAuthCodeToMessage[error.code] ||
-              "Something went wrong with your sign up process"
-          )
-        );
-      });
-  });
+  user: any,
+): Promise<User> => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      user.email,
+      user.password,
+    );
+    return userCredential.user;
+  } catch (error: any) {
+    throw new Error(mapAuthCodeToMessage[error.code] || AUTH_ERROR);
+  }
 };
 
 export const loginWithEmailAndPasswordFirebase = async (
-  user: any
-): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    signInWithEmailAndPassword(auth, user.email, user.password)
-      .then((userCredential) => {
-        resolve(userCredential.user);
-      })
-      .catch((error) => {
-        reject(
-          new Error(
-            mapAuthCodeToMessage[error.code] ||
-              "Something went wrong with your authentication process"
-          )
-        );
-      });
-  });
+  user: any,
+): Promise<User> => {
+  try {
+    const userCredential: UserCredential = await signInWithEmailAndPassword(
+      auth,
+      user.email,
+      user.password,
+    );
+    return userCredential.user;
+  } catch (error: any) {
+    throw new Error(mapAuthCodeToMessage[error.code] || AUTH_ERROR);
+  }
 };
 
 export const sendUserPasswordResetEmail = async (
-  email: string
+  email: string,
 ): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        resolve(true);
-      })
-      .catch((error) => {
-        reject(
-          new Error(
-            mapAuthCodeToMessage[error.code] ||
-              "Something went wrong with your password reset process"
-          )
-        );
-      });
-  });
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (error: any) {
+    throw new Error(mapAuthCodeToMessage[error.code] || AUTH_ERROR);
+  }
 };
 
 export const loginWithGoogleFirebase = async (): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        const additionalInfo = getAdditionalUserInfo(result);
-        resolve({ user, additionalInfo });
-      })
-      .catch((error) => {
-        reject(
-          new Error(
-            mapAuthCodeToMessage[error.code] ||
-              "Something went wrong with your authentication process"
-          )
-        );
-      });
-  });
+  try {
+    const provider: GoogleAuthProvider = new GoogleAuthProvider();
+    const userCredential: UserCredential = await signInWithPopup(
+      auth,
+      provider,
+    );
+    console.log(userCredential);
+    return userCredential.user;
+  } catch (error: any) {
+    throw new Error(
+      mapAuthCodeToMessage[error.code] ||
+        "Something went wrong with your authentication process",
+    );
+  }
 };
 
-export const signOutFirebase = async (): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    signOut(auth)
-      .then(() => {
-        resolve(true);
-      })
-      .catch((error) => {
-        reject(
-          new Error(
-            mapAuthCodeToMessage[error.code] ||
-              "Something went wrong with your sign out process"
-          )
-        );
-      });
-  });
+export const signOutFirebase = async (): Promise<boolean> => {
+  try {
+    await signOut(auth);
+    return true;
+  } catch (error: any) {
+    throw new Error(mapAuthCodeToMessage[error.code] || AUTH_ERROR);
+  }
 };
 
 export const logout = async () => {
   try {
     await signOutFirebase();
-    localStorage.removeItem("admin");
+    localStorage.removeItem("user");
     localStorage.removeItem("token");
     setTimeout(() => {
       window.location.href = "/";

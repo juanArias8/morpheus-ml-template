@@ -2,9 +2,8 @@ from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
 
-from pydantic import BaseModel
-
 from app.config.settings import get_settings
+from pydantic import BaseModel
 
 settings = get_settings()
 
@@ -32,12 +31,13 @@ class User(BaseModel):
 
 class TextGenerationRequest(BaseModel):
     task_id: UUID = None
+    prompt: str = "Hey, Are you there?"
+    model_name: str = "ChatGLM-6B"
+
+
+class ImageGenerationRequest(BaseModel):
+    task_id: UUID = None
     prompt: str = "a beautiful cat with blue eyes, artwork, fujicolor, trending on artstation"
-    pipeline: str
-    model_id: str = "Gustavosta/MagicPrompt-Stable-Diffusion"
-
-
-class ImageGenerationRequest(TextGenerationRequest):
     negative_prompt: str = "bad, low res, ugly, deformed"
     width: int = 768
     height: int = 768
@@ -46,7 +46,8 @@ class ImageGenerationRequest(TextGenerationRequest):
     num_images_per_prompt: int = 1
     generator: int = -1
     strength: Optional[float] = 0.75
-    sampler: str
+    sampler: str = "DDPMScheduler"
+    model_name: str = "Stable Diffusion XL Text2Img"
 
 
 class Generation(BaseModel):
@@ -99,6 +100,7 @@ class MLModel(BasicModel):
     is_active: bool = True
 
     class Config:
+        orm_mode = True
         schema_extra = {
             "example": {
                 "name": "Model Name",
@@ -107,5 +109,17 @@ class MLModel(BasicModel):
                 "description": "Model description",
                 "url_docs": "https://modeldocs.com",
                 "is_active": True,
+            }
+        }
+
+
+class NewsletterRegister(BaseModel):
+    email: str
+
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "email": "user@email.com",
             }
         }

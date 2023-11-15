@@ -109,3 +109,9 @@ class RayAIClient:
         logger.info(f"Running generate_magic_prompt process with request: {request}")
         task_id = send_request_to_ray_server(endpoint="magic_prompt", request=request)
         return str(task_id)
+
+    @staticmethod
+    def generate_text_with_chatbot(*, request: TextGenerationRequest) -> str:
+        logger.info(f"Running generate_text_with_chatbot process with request: {request}")
+        task_id = send_request_to_ray_server(endpoint="text", request=request)
+        return str(task_id)

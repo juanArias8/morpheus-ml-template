@@ -19,7 +19,7 @@ class ImageModelHandler:
         self.logger = logging.getLogger("ray")
         self.generator_args = {
             "pipeline": self.request.pipeline,
-            "model_id": self.request.model_id,
+            "model_id": self.request.model_source,
             "scheduler": self.request.scheduler,
         }
         self.generator = self.get_generator().remote(**self.generator_args)
@@ -54,7 +54,7 @@ class ImageModelHandler:
             # Upload images to S3 Bucket
             image_urls = self.s3_client.upload_multiple_files(
                 files=generated_images,
-                file_name=f"{self.request.task_id}"
+                base_name=f"{self.request.user_id}/{self.request.task_id}"
             )
 
             # Update generation in database

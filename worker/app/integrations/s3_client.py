@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import Any, List
 
 import boto3
+
 from app.settings.settings import get_settings
 
 settings = get_settings()
@@ -14,7 +15,7 @@ class S3Client:
 
         self.AWS_ACCESS_KEY_ID = settings.aws_access_key_id
         self.AWS_SECRET_ACCESS_KEY = settings.aws_secret_access_key
-        self.IMAGES_BUCKET = settings.images_bucket
+        self.RESULTS_BUCKET = settings.results_bucket
 
         self.s3_client = boto3.client(
             "s3",
@@ -26,25 +27,24 @@ class S3Client:
         img_byte_arr = BytesIO()
         file.save(img_byte_arr, format="png")
         img_byte_arr = img_byte_arr.getvalue()
-        key = f"{settings.images_temp_bucket}/{file_name}"
 
         try:
             self.s3_client.put_object(
                 Body=img_byte_arr,
-                Bucket=self.IMAGES_BUCKET,
-                Key=key,
+                Bucket=self.RESULTS_BUCKET,
+                Key=file_name,
             )
-            self.logger.info(f"Image uploaded to S3: {key}")
-            return f"https://{self.IMAGES_BUCKET}.s3.amazonaws.com/{key}"
+            self.logger.info(f"Image uploaded to S3: {file_name}")
+            return f"https://{self.RESULTS_BUCKET}.s3.amazonaws.com/{file_name}"
         except Exception as e:
-            self.logger.error(f"Error uploading image to S3: {key}")
+            self.logger.error(f"Error uploading image to S3: {file_name}")
             self.logger.error(e)
 
-    def upload_multiple_files(self, *, files: List[Any], file_name: str):
+    def upload_multiple_files(self, *, files: List[Any], base_name: str):
         image_urls = [
             self.upload_file(
                 file=image,
-                file_name=f"{file_name}-{index}.png"
+                file_name=f"{base_name}-{index}.png"
             ) for index, image in enumerate(files)
         ]
         self.logger.info(f"StableDiffusionV2Text2Img.generate: all_data: {image_urls}")

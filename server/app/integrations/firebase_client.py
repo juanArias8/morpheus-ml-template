@@ -1,12 +1,11 @@
-from fastapi import Depends, HTTPException, status, Response
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from firebase_admin import auth, credentials, initialize_app
-from loguru import logger
-
 from app.config.database.database import get_db
 from app.config.settings import get_settings
 from app.error.user import UserNotFoundError
 from app.repository.user_repository import UserRepository
+from fastapi import Depends, HTTPException, status, Response
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from firebase_admin import auth, credentials, initialize_app
+from loguru import logger
 
 settings = get_settings()
 user_repository = UserRepository()
@@ -45,18 +44,11 @@ def validate_firebase_user(authorization: HTTPAuthorizationCredentials):
         )
 
 
-def validate_morpheus_user_and_role(user_email: str, role: str):
+def validate_morpheus_user(user_email: str):
     user = user_repository.get_user_by_email(db=db, email=user_email)
     if user is None:
         raise UserNotFoundError(f"User with email {user_email} not found")
-    user_roles = user.roles
-    if role not in [user_role.name for user_role in user_roles]:
-        logger.error(f"User {user.email} does not have {role} permission to access this resource")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"User {user.email} does not have {role} permission to access this resource",
-        )
-    logger.info(f"User {user.email} authenticated with role {role} successfully with Morpheus")
+    logger.info(f"User {user.email} authenticated with with Morpheus")
 
 
 def get_user(
@@ -64,6 +56,6 @@ def get_user(
         authorization: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False)),
 ):
     decoded_token = validate_firebase_user(authorization=authorization)
-    validate_morpheus_user_and_role(user_email=decoded_token["email"], role="user")
+    validate_morpheus_user(user_email=decoded_token["email"])
     res.headers["WWW-Authenticate"] = 'Bearer realm="auth_required"'
     return decoded_token

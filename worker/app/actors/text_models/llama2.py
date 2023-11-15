@@ -16,7 +16,7 @@ class Llama2TextGeneration:
     def __init__(self):
         from huggingface_hub.hf_api import HfFolder
 
-        HfFolder.save_token(settings.hf_access_token)
+        HfFolder.save_token(settings.hf_api_key)
         self.logger = logging.getLogger("ray")
         self.model = "meta-llama/Llama-2-7b-chat-hf"
         self.tokenizer = AutoTokenizer.from_pretrained(self.model)
@@ -25,6 +25,7 @@ class Llama2TextGeneration:
             model=self.model,
             torch_dtype=torch.float16,
             device_map="auto",
+            token=settings.hf_api_key,
         )
 
     def generate(self, request: TextGenerationRequest):

@@ -1,12 +1,8 @@
 "use client";
-import { Auth } from "@/components/organisms/auth/Auth";
+import { Auth } from "@/components/organisms/Auth/Auth";
 
 const Home = () => {
-  return (
-    <div className="h-screen w-full">
-      <Auth />
-    </div>
-  );
+  return <Auth />;
 };
 
 export default Home;

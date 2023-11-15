@@ -1,4 +1,4 @@
-from app.config.database.init_data.categories import img2img, inpainting, text2img
+from app.config.database.init_data.categories import img2img, inpainting, text2img, chatbot
 
 ml_models = [
     {
@@ -25,4 +25,12 @@ ml_models = [
         "pipeline": "StableDiffusionXLInpaintPipeline",
         "category": inpainting,
     },
+    {
+        "name": "ChatGLM-6B",
+        "description": "ChatGLM-6B is an open bilingual language model based on General Language Model framework.",
+        "url_docs": "https://huggingface.co/THUDM/chatglm-6b",
+        "source": "THUDM/chatglm3-6b",
+        "pipeline": "AutoModel",
+        "category": chatbot,
+    }
 ]

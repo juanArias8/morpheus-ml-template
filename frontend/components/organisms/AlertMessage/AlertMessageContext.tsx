@@ -59,7 +59,7 @@ const AlertMessageProvider = (props: { children: ReactNode }) => {
 
   const showErrorAlert = (message: string) => {
     if (!message) return;
-    setTitle("Error!");
+    setTitle("NotFound!");
     setMessage(message);
     setStyles("bg-danger text-white");
     setOpen(true);
@@ -88,7 +88,7 @@ const useAlertMessage = () => {
   const context = React.useContext(AlertMessageContext);
   if (context === undefined) {
     throw new Error(
-      "useAlertMessage must be used within a AlertMessageProvider"
+      "useAlertMessage must be used within a AlertMessageProvider",
     );
   }
   return context;

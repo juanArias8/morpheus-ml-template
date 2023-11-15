@@ -23,12 +23,6 @@ class Settings(BaseSettings):
     firebase_client_email: str
     firebase_web_api_key: str
 
-    # AWS and s3 config
-    aws_access_key_id: str
-    aws_secret_access_key: str
-    results_bucket: str
-    images_bucket: str = "morpheus-images"
-
     class Config:
         env_file = "secrets.env"
 

@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/organisms/auth/AuthContext";
-import Brand from "@/components/atoms/Brand/Brand";
+import { useAuth } from "@/components/organisms/Auth/AuthContext";
+import Brand from "@/components/atoms/Brand";
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const router = useRouter();
@@ -16,13 +17,18 @@ const Navbar = () => {
   };
 
   return (
-    <div className="navbar border-primary flex flex-row justify-between hover:border-b">
+    <div
+      className={cn(
+        "navbar border-primary h-[8vh] hover:navbar-gradient flex flex-row justify-between border-b " +
+          "bg-gradient-to-b from-primary/5 from-90% to-primary/30",
+      )}
+    >
       <div className="navbar-start">
-        <a className="btn btn-ghost text-xl normal-case">
+        <a className="btn text-xl normal-case">
           <Brand
             short={false}
             onClick={redirectToHome}
-            styles={{ fontSize: "20px" }}
+            styles={{ fontSize: "22px" }}
           />
         </a>
       </div>
@@ -30,53 +36,60 @@ const Navbar = () => {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
           <li>
-            <Link className="hover:text-accent" href={"/diffusion"}>
+            <Link className="hover:text-accent mx-1" href={"/diffusion"}>
               Image Generation
             </Link>
           </li>
           <li>
-            <Link className="hover:text-accent" href={"/chatbot"}>
+            <Link className="hover:text-accent mx-1" href={"/chatbot"}>
               Text Generation
             </Link>
           </li>
           <li>
-            <Link className="hover:text-accent" href={"/storytelling"}>
+            <Link className="hover:text-accent mx-1" href={"/storytelling"}>
               Story Telling
             </Link>
           </li>
         </ul>
       </div>
 
-      <div className="navbar-end">
-        <div className="dropdown dropdown-end">
-          <div
-            tabIndex={0}
-            className="btn btn-ghost btn-circle avatar hover:border-1 hover:border-primary"
-          >
-            <div className="ring-primary ring-offset-base-100 rounded-full ring ring-offset-2">
-              <Image
-                src={"/favicon/android-chrome-192x192.png"}
-                alt={"Morpheus logo"}
-                width={100}
-                height={100}
-                className={"rounded-full object-contain"}
-              />
+      {user && (
+        <div className="navbar-end pr-1">
+          <div className="dropdown dropdown-end">
+            <div
+              tabIndex={0}
+              className="btn btn-ghost btn-circle avatar hover:border-1 hover:border-primary"
+            >
+              <div className="ring-primary ring-offset-base-100 shadow-primary rounded-full ring-[2px] ring-offset-1">
+                <Image
+                  src={user.avatar ?? "/images/morpheus.png"}
+                  alt={"Morpheus logo"}
+                  width={100}
+                  height={100}
+                  className={"rounded-full object-contain"}
+                />
+              </div>
             </div>
-          </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
-          >
-            <li>
-              <a>Profile</a>
-            </li>
 
-            <li>
-              <a onClick={logout}>Logout</a>
-            </li>
-          </ul>
+            <ul
+              tabIndex={0}
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2"
+            >
+              <li>
+                <Link href={"/profile"} className="p-3">
+                  Profile
+                </Link>
+              </li>
+
+              <li>
+                <a onClick={logout} className="p-3">
+                  Logout
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -55,7 +55,7 @@ export const Button = (props: ButtonProps) => {
         props.variant,
         props.fill,
         props.size,
-        props.className
+        props.className,
       )}
       onClick={props.onClick}
       disabled={props.disabled}
@@ -63,7 +63,7 @@ export const Button = (props: ButtonProps) => {
       style={props.style}
     >
       {props.loading ? (
-        <CircleLoader isLoading={true} />
+        <CircleLoader isLoading={true} displayText={false} />
       ) : (
         <Fragment>
           {props.text}

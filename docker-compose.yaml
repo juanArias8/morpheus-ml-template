@@ -55,7 +55,7 @@ services:
     image: frontend:latest
     entrypoint: ./bin/entrypoint.sh
     volumes:
-      - ./temp-frontend:/app
+      - ./frontend:/app
     ports:
       - "3000:3000"
     stdin_open: true

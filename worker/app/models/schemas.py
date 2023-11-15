@@ -2,10 +2,9 @@ from enum import Enum
 from typing import Optional, List
 from uuid import UUID
 
-from pydantic import BaseModel
-
 from app.settings.settings import get_settings
 from app.utils.prompts import generate_random_prompt
+from pydantic import BaseModel
 
 settings = get_settings()
 
@@ -19,16 +18,18 @@ class CategoryEnum(str, Enum):
 class TextCategoryEnum(str, Enum):
     MAGIC_PROMPT = "magic_prompt"
     LLAMA2 = "llama2"
+    ALPACA = "alpaca"
+    CHAT_GLM = "chat_glm"
 
 
 class TextGenerationRequest(BaseModel):
     task_id: str = None
-    prompt: str = "a beautiful cat with blue eyes, artwork, fujicolor, trending on artstation"
-    model_id: str = "Gustavosta/MagicPrompt-Stable-Diffusion"
-    user_id: str
+    prompt: str = "Hello, Are you there?"
+    handler: str = settings.default_model_handler
+    user_id: str = "1111122222"
 
 
-class ImageGenerationRequest(TextGenerationRequest):
+class ImageGenerationRequest(BaseModel):
     task_id: str = None
     prompt: str = "a beautiful cat with blue eyes, artwork, fujicolor, trending on artstation"
     negative_prompt: str = "bad, low res, ugly, deformed"
@@ -41,10 +42,8 @@ class ImageGenerationRequest(TextGenerationRequest):
     strength: Optional[float] = 0.8
     pipeline: str = settings.default_pipeline
     scheduler: str = settings.default_scheduler
-    model_id: str = settings.default_model
-    controlnet_id: str = None
-    controlnet_type: str = None
-    user_id: str = "user@morpheus.com"
+    model_source: str = settings.default_model
+    user_id: str = "1111122222"
 
     class Config:
         schema_extra = {

@@ -3,6 +3,8 @@ import uuid
 
 import ray
 
+from app.actors.text_models.chat_glm import ChatGLMTextGeneration
+from app.actors.text_models.alpaca import AlpacaTextGeneration
 from app.actors.text_models.llama2 import Llama2TextGeneration
 from app.actors.text_models.magic_prompt import StableDiffusionMagicPrompt
 from app.integrations.db_client import DBClient
@@ -11,8 +13,8 @@ from app.models.schemas import Generation, TextCategoryEnum, TextGenerationReque
 
 @ray.remote
 class TextModelHandler:
-    def __init__(self, *, endpoint: TextCategoryEnum):
-        self.endpoint = endpoint
+    def __init__(self, *, handler: TextCategoryEnum):
+        self.handler = handler
         self.logger = logging.getLogger("ray")
         self.generator = self.get_generator().remote()
 
@@ -20,10 +22,12 @@ class TextModelHandler:
         generators = {
             TextCategoryEnum.MAGIC_PROMPT: StableDiffusionMagicPrompt,
             TextCategoryEnum.LLAMA2: Llama2TextGeneration,
+            TextCategoryEnum.ALPACA: AlpacaTextGeneration,
+            TextCategoryEnum.CHAT_GLM: ChatGLMTextGeneration,
         }
-        generator = generators.get(self.endpoint)
+        generator = generators.get(self.handler)
         if generator is None:
-            raise ValueError(f"Invalid endpoint: {self.endpoint}")
+            raise ValueError(f"Invalid handler: {self.handler}")
         return generator
 
     def handle_generation(self, request: TextGenerationRequest):
