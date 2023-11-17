@@ -5,7 +5,7 @@ import { AuthOption, useAuth } from "@/components/organisms/Auth/AuthContext";
 import { ArrowBackIcon } from "@/components/atoms/icons/arrowBack";
 import { TextInput } from "@/components/atoms/Input";
 import { Button, ButtonVariant } from "@/components/atoms/Button";
-import { useAlertMessage } from "@/components/organisms/AlertMessage/AlertMessageContext";
+import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContext";
 import { Typography, TypographyVariant } from "@/components/atoms/Typography";
 
 interface ResetFormModel {
@@ -25,7 +25,7 @@ export const ResetForm = () => {
   } = useForm<ResetFormModel>({ defaultValues });
 
   const { setAuthOption, resetPassword } = useAuth();
-  const { showSuccessAlert, showErrorAlert } = useAlertMessage();
+  const { showSuccessAlert, showErrorAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
   const handleFormSubmit = (data: any) => {

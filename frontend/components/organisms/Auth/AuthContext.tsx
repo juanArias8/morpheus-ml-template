@@ -166,7 +166,7 @@ const AuthProvider = (props: { children: ReactNode }) => {
   const resetPassword = async (email: string): Promise<any> => {
     try {
       await sendUserPasswordResetEmail(email);
-      alert("Email sent successfully");
+      alert("Check your email to reset your password");
     } catch (error: any) {
       alert(error.message || "Something went wrong");
     }

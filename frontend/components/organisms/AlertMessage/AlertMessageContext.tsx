@@ -15,7 +15,7 @@ export interface IToastContext {
 
 const defaultState = {
   open: false,
-  setOpen: (open: boolean) => {},
+  setOpen: () => {},
   title: "",
   message: "",
   styles: "",
@@ -59,7 +59,7 @@ const AlertMessageProvider = (props: { children: ReactNode }) => {
 
   const showErrorAlert = (message: string) => {
     if (!message) return;
-    setTitle("NotFound!");
+    setTitle("Error!");
     setMessage(message);
     setStyles("bg-danger text-white");
     setOpen(true);
@@ -84,7 +84,7 @@ const AlertMessageProvider = (props: { children: ReactNode }) => {
   );
 };
 
-const useAlertMessage = () => {
+const useAlert = () => {
   const context = React.useContext(AlertMessageContext);
   if (context === undefined) {
     throw new Error(
@@ -94,4 +94,4 @@ const useAlertMessage = () => {
   return context;
 };
 
-export { AlertMessageProvider, useAlertMessage };
+export { AlertMessageProvider, useAlert };

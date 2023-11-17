@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { APIResponse } from "@/lib/models";
-import { useAlertMessage } from "@/components/organisms/AlertMessage/AlertMessageContext";
+import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContext";
 import { Button, ButtonVariant } from "@/components/atoms/Button";
 import { TextInput } from "@/components/atoms/Input";
 import { registerNewUserToNewsletter } from "@/api/newsletter-api";
@@ -15,7 +15,7 @@ const defaultValues = {
 };
 
 export const NewsletterForm = () => {
-  const { showSuccessAlert, showErrorAlert } = useAlertMessage();
+  const { showSuccessAlert, showErrorAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
   const {

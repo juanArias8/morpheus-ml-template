@@ -1,54 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Typography, TypographyVariant } from "@/components/atoms/Typography";
-import {
-  generateImageWithText2Img,
-  getGenerationResult,
-} from "@/api/generation-api";
-import { useAlertMessage } from "@/components/organisms/AlertMessage/AlertMessageContext";
 import GenerateButton from "@/components/molecules/GenerateButton";
 import UserPrompt from "@/components/molecules/UserPrompt";
 import ImageResults from "@/components/molecules/ImageResults";
-import { generateRandomNumber } from "@/lib/utils";
 import GeneratingModal from "@/components/molecules/GeneratingModal";
+import useImageGeneration, {
+  defaultConfig,
+} from "@/app/(dashboard)/diffusion/useImageGeneration";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
-interface ImageItem {
+interface GenerationItem {
   prompt: string;
   images: string[];
 }
 
-interface DiffusionParams {
-  prompt: string;
-  width: number;
-  height: number;
-  num_inference_steps: number;
-  guidance_scale: number;
-  num_images_per_prompt: number;
-  negative_prompt: string;
-  generator: number;
-  model_name: string;
-  sampler: string;
-}
-
-const defaultConfig: DiffusionParams = {
-  prompt: "a beautiful picture of a cat",
-  width: 768,
-  height: 768,
-  num_inference_steps: 50,
-  guidance_scale: 10,
-  num_images_per_prompt: 3,
-  negative_prompt: "bad, ugly",
-  generator: generateRandomNumber(20),
-  model_name: "Stable Diffusion XL Text2Img",
-  sampler: "DDPMScheduler",
-};
-
 export default function DiffusionPage() {
-  const { showErrorAlert } = useAlertMessage();
+  const { generateImage, loading, results } = useImageGeneration();
   const [prompt, setPrompt] = useState(defaultConfig.prompt);
-  const [results, setResults] = useState<Array<ImageItem>>([]);
   const [formValid, setFormValid] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [allResults, setAllResults] = useLocalStorage("diffusion", []);
 
   useEffect(() => {
     if (prompt.length > 0) {
@@ -56,33 +27,15 @@ export default function DiffusionPage() {
     }
   }, [prompt]);
 
-  const handleGenerate = async () => {
-    setLoading(true);
-    const randomGenerator = generateRandomNumber(20);
-    const request: DiffusionParams = {
-      ...defaultConfig,
-      generator: randomGenerator,
-      prompt: prompt,
-    };
-    const responseRequest = await generateImageWithText2Img(request);
-    if (!responseRequest.success) {
-      showErrorAlert(responseRequest.message);
+  useEffect(() => {
+    if (results.length > 0) {
+      const generationItem: GenerationItem = {
+        prompt: prompt,
+        images: results,
+      };
+      setAllResults([...allResults, generationItem]);
     }
-    const responseResults = await getGenerationResult(
-      responseRequest.data.task_id,
-    );
-    console.log(responseResults);
-    if (!responseResults.success) {
-      showErrorAlert(responseResults.message);
-    }
-    const imageItem: ImageItem = {
-      prompt: prompt,
-      images: responseResults.data.results,
-    };
-    setResults([...results, imageItem]);
-    setLoading(false);
-    window.scrollTo(0, document.body.scrollHeight);
-  };
+  }, [results]);
 
   return (
     <section className="main-section">
@@ -95,7 +48,7 @@ export default function DiffusionPage() {
       </Typography>
 
       <GenerateButton
-        onClick={handleGenerate}
+        onClick={() => generateImage(prompt)}
         promptValue={prompt}
         setPromptValue={setPrompt}
         disabled={!formValid}
@@ -103,7 +56,7 @@ export default function DiffusionPage() {
       />
 
       <div className="flex flex-col">
-        {results.map((result: ImageItem, index: number) => (
+        {allResults.map((result: GenerationItem, index: number) => (
           <div
             className="flex flex-col mt-10 bg-base-200 rounded-lg px-5 py-5"
             key={index}

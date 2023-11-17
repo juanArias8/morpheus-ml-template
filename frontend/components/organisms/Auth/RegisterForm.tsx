@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/components/organisms/Auth/AuthContext";
 import { TextInput } from "@/components/atoms/Input";
@@ -7,6 +6,7 @@ import { Button, ButtonVariant } from "@/components/atoms/Button";
 import { Separator } from "@/components/atoms/Separator";
 import { SignUpWithGoogle } from "@/components/organisms/Auth/SignUpWithGoogle";
 import AuthSwitch from "@/components/organisms/Auth/AuthSwitch";
+import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContext";
 
 export interface LoginFormModel {
   name: string;
@@ -21,33 +21,33 @@ const defaultValues = {
 };
 
 export const RegisterForm = () => {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm<LoginFormModel>({ defaultValues });
-  const { setAuthOption, registerWithEmailAndPassword } = useAuth();
+  const { registerWithEmailAndPassword } = useAuth();
+  const { showErrorAlert } = useAlert();
 
   const [loading, setLoading] = useState(false);
 
   const handleFormSubmit = async (data: any) => {
     setLoading(true);
-    registerWithEmailAndPassword(data)
-      .then(() => {
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+    try {
+      await registerWithEmailAndPassword(data);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      showErrorAlert(error?.message || "Something went wrong");
+    }
   };
 
   return (
     <div className={"w-full"}>
       <AuthSwitch />
 
-      <SignUpWithGoogle text="Sign Up" />
+      <SignUpWithGoogle />
       <Separator />
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-2">

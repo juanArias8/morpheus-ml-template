@@ -1,10 +1,10 @@
 "use client";
 import Modal from "@/components/atoms/Modal";
 import { Typography, TypographyVariant } from "@/components/atoms/Typography";
-import { useAlertMessage } from "@/components/organisms/AlertMessage/AlertMessageContext";
+import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContext";
 
 const AlertMessage = () => {
-  const { open, setOpen, title, message } = useAlertMessage();
+  const { open, setOpen, title, message } = useAlert();
 
   return (
     <Modal open={open} onClose={() => setOpen(false)}>

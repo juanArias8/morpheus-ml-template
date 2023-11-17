@@ -4,7 +4,7 @@ import { TextInput } from "@/components/atoms/Input";
 import { Button, ButtonVariant } from "@/components/atoms/Button";
 import { updateUserInfo } from "@/api/users-api";
 import { APIResponse } from "@/lib/models";
-import { useAlertMessage } from "@/components/organisms/AlertMessage/AlertMessageContext";
+import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContext";
 import { useAuth } from "@/components/organisms/Auth/AuthContext";
 import { Auth } from "@/components/organisms/Auth/Auth";
 
@@ -16,7 +16,7 @@ export interface UserFormModel {
 
 export const UserForm = () => {
   const { user } = useAuth();
-  const { showSuccessAlert, showErrorAlert } = useAlertMessage();
+  const { showSuccessAlert, showErrorAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
   const defaultValues = {

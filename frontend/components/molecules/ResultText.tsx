@@ -8,12 +8,10 @@ interface ResultTextProps {
 
 const ResultText = (props: ResultTextProps) => {
   return (
-    <div
-      className={`bg-base-200 mt-10 rounded-lg px-5 py-5 ${props.className}`}
-    >
-      <div className="flex w-full flex-row p-2 items-center">
+    <div className={`bg-base-200 mt-5 rounded-lg px-5 py-5 ${props.className}`}>
+      <div className="flex w-full flex-row p-2">
         <div className="avatar">
-          <div className="h-8 w-8 rounded-full">
+          <div className="h-10 w-10 rounded-full p-1 bg-primary-content">
             <Image
               src={"/images/morpheus.png"}
               alt={"Morpheus logo"}

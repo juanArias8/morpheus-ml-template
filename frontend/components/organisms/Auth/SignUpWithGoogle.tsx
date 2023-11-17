@@ -2,15 +2,11 @@ import React, { useState } from "react";
 import { Button, ButtonFill, ButtonVariant } from "@/components/atoms/Button";
 import { useAuth } from "@/components/organisms/Auth/AuthContext";
 import { GoogleIcon } from "@/components/atoms/icons/google";
-import { useAlertMessage } from "@/components/organisms/AlertMessage/AlertMessageContext";
+import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContext";
 
-interface SignUpWithGoogleProps {
-  text?: string;
-}
-
-export const SignUpWithGoogle = (props: SignUpWithGoogleProps) => {
+export const SignUpWithGoogle = () => {
   const { loginWithGoogle } = useAuth();
-  const { showErrorAlert } = useAlertMessage();
+  const { showErrorAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {

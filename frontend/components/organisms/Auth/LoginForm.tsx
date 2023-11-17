@@ -10,6 +10,7 @@ import { Button, ButtonVariant } from "@/components/atoms/Button";
 import { SignUpWithGoogle } from "@/components/organisms/Auth/SignUpWithGoogle";
 import { Separator } from "@/components/atoms/Separator";
 import AuthSwitch from "@/components/organisms/Auth/AuthSwitch";
+import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContext";
 
 const defaultValues = {
   email: "",
@@ -26,16 +27,17 @@ export const LoginForm = () => {
   const { setAuthOption, loginWithEmailAndPassword } = useAuth();
 
   const [loading, setLoading] = useState(false);
+  const { showErrorAlert } = useAlert();
 
   const handleFormSubmit = async (data: any) => {
     setLoading(true);
-    loginWithEmailAndPassword(data)
-      .then(async (response) => {
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+    try {
+      await loginWithEmailAndPassword(data);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      showErrorAlert(error?.message || "Something went wrong");
+    }
   };
 
   return (

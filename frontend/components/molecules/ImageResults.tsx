@@ -15,7 +15,7 @@ const ImageResults = (props: ImageResultsProps) => {
   }
 
   return (
-    <div className="flex flex-row flex-wrap gap-x-10 gap-y-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-800 overflow-auto">
       {props.images.map((image: string, index: number) => (
         <Image
           key={index}

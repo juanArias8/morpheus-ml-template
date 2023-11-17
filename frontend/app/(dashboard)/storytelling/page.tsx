@@ -1,15 +1,14 @@
 "use client";
 import { Typography, TypographyVariant } from "@/components/atoms/Typography";
 import { Button, ButtonVariant } from "@/components/atoms/Button";
-import { useAlertMessage } from "@/components/organisms/AlertMessage/AlertMessageContext";
 import { Fragment, useEffect, useState } from "react";
-import {
-  generateImageWithText2Img,
-  generateTextWithChatBot,
-} from "@/api/generation-api";
 import GenerateButton from "@/components/molecules/GenerateButton";
 import ResultText from "@/components/molecules/ResultText";
 import ImageResults from "@/components/molecules/ImageResults";
+import useTextGeneration from "@/app/(dashboard)/chatbot/useTextGeneration";
+import useImageGeneration from "@/app/(dashboard)/diffusion/useImageGeneration";
+import GeneratingModal from "@/components/molecules/GeneratingModal";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 interface StoryBookItem {
   prompt: string;
@@ -17,55 +16,56 @@ interface StoryBookItem {
   images?: string[];
 }
 
-export default function StorytellingPage() {
-  const { showErrorAlert } = useAlertMessage();
-  const [prompt, setPrompt] = useState("");
-  const [storyBook, setStoryBook] = useState<Array<StoryBookItem>>([]);
-  const [formValid, setFormValid] = useState(false);
-  const [loading, setLoading] = useState(false);
+const basePrompt: string =
+  "Write a story's first paragraph about a lost explorer discovering an ancient, hidden city.";
 
+export default function StorytellingPage() {
+  const {
+    generateText,
+    results: textResults,
+    loading: textLoading,
+  } = useTextGeneration();
+  const {
+    generateImage,
+    results: imageResults,
+    loading: imageLoading,
+  } = useImageGeneration();
+  const [prompt, setPrompt] = useState(basePrompt);
+  const [storyBook, setStoryBook] = useLocalStorage("storyBook", []);
+  const [formValid, setFormValid] = useState(false);
+  const [indexForImageGeneration, setIndexForImageGeneration] = useState(0);
+
+  // Validates the prompt input
   useEffect(() => {
     if (prompt.length > 0) {
       setFormValid(true);
     }
   }, [prompt]);
 
-  useEffect(() => {}, [storyBook]);
-
-  const handleGenerateText = async () => {
-    setLoading(true);
-    try {
-      const response = await generateTextWithChatBot(prompt);
-      if (!response.success) {
-        showErrorAlert(response.message);
-      }
-      setLoading(false);
+  // Adds the text result to the story book
+  useEffect(() => {
+    if (textResults.length > 0) {
       const storyBookItem: StoryBookItem = {
         prompt: prompt,
-        text: response.data.text,
+        text: textResults[0],
       };
       setStoryBook([...storyBook, storyBookItem]);
-    } catch (err) {
-      showErrorAlert(String(err));
-      setLoading(false);
     }
-  };
+  }, [textResults]);
 
-  const handleGenerateImage = async (index: number) => {
-    setLoading(true);
-    try {
-      const response = await generateImageWithText2Img(prompt);
-      if (!response.success) {
-        showErrorAlert(response.message);
-      }
-      setLoading(false);
+  // Adds the image result to the story book page
+  useEffect(() => {
+    if (imageResults.length > 0) {
       const storyBookCopy = [...storyBook];
-      storyBookCopy[index].images = response.data.images;
+      storyBookCopy[indexForImageGeneration].images = imageResults;
       setStoryBook(storyBookCopy);
-    } catch (err) {
-      showErrorAlert(String(err));
-      setLoading(false);
     }
+  }, [imageResults]);
+
+  const handleGenerateImage = async (pageIndex: number) => {
+    setIndexForImageGeneration(pageIndex);
+    const page = storyBook[pageIndex];
+    await generateImage(page.text);
   };
 
   return (
@@ -77,11 +77,11 @@ export default function StorytellingPage() {
       </Typography>
 
       <GenerateButton
-        onClick={handleGenerateText}
+        onClick={() => generateText(prompt)}
         promptValue={prompt}
         setPromptValue={setPrompt}
         disabled={!formValid}
-        loading={loading}
+        loading={textLoading}
       />
 
       <div className="relative flex flex-col flex-wrap">
@@ -94,9 +94,10 @@ export default function StorytellingPage() {
                 text={"Generate Image"}
                 btnClass={"mt-2 max-w-[180px]"}
                 variant={ButtonVariant.Primary}
-                disabled={loading || !formValid}
+                disabled={imageLoading || !formValid}
                 className="btn btn-primary bt-5"
-                onClick={() => handleGenerateImage(storyBook.indexOf(page))}
+                loading={imageLoading}
+                onClick={() => handleGenerateImage(index)}
               />
             ) : (
               <ImageResults images={page.images} />
@@ -104,6 +105,8 @@ export default function StorytellingPage() {
           </Fragment>
         ))}
       </div>
+
+      <GeneratingModal open={textLoading || imageLoading} />
     </section>
   );
 }
