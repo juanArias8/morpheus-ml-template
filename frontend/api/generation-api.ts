@@ -2,7 +2,7 @@ import axiosClient from "@/lib/axiosClient";
 import { ErrorResponse, SuccessResponse } from "@/lib/models";
 import { sleep } from "@/lib/utils";
 
-const MAX_RETRY_COUNT = 32;
+const MAX_RETRY_COUNT: number = 100;
 
 export const generateImageWithText2Img = async (request: any) => {
   try {
@@ -100,5 +100,5 @@ const mapCounterToSleepTime = (counter: number) => {
   if (counter <= 5) return 1000;
   if (counter <= 10) return 2000;
   if (counter <= 20) return 3000;
-  return 1000;
+  return 5000;
 };
