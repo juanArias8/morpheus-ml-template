@@ -24,7 +24,7 @@ export const UserForm = () => {
     name: user?.name || "",
     bio: user?.bio || "",
   };
-  console.log(defaultValues);
+
   const {
     register,
     handleSubmit,
@@ -35,7 +35,6 @@ export const UserForm = () => {
   if (!user) return <Auth />;
 
   const handleFormSubmit = async (data: any) => {
-    console.log(data);
     setLoading(true);
     try {
       const response: APIResponse = await updateUserInfo(data);

@@ -1,14 +1,14 @@
+import CircleLoader from "@/components/atoms/CircleLoader";
+
 type FullScreenLoaderProps = {
   isLoading: boolean;
 };
 
 const FullScreenLoader = (props: FullScreenLoaderProps) => {
   return (
-    <div className={"h-full w-full"}>
+    <div className={"flex items-center justify-center w-full h-screen"}>
       {props.isLoading && (
-        <span className="loading loading-spinner loading-lg">
-          <span className="text-5xl">Loading...</span>
-        </span>
+        <CircleLoader isLoading={props.isLoading} displayText={true} />
       )}
     </div>
   );

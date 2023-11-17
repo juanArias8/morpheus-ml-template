@@ -1,21 +1,32 @@
 "use client";
-import { Fragment, ReactNode } from "react";
-import { useAuth } from "@/components/organisms/Auth/AuthContext";
-import { Auth } from "@/components/organisms/Auth/Auth";
-import { usePathname, useRouter } from "next/navigation";
+import {Fragment, ReactNode, useEffect, useState} from "react";
+import {useAuth} from "@/components/organisms/Auth/AuthContext";
+import {usePathname, useRouter} from "next/navigation";
+import CircleLoader from "@/components/atoms/CircleLoader";
+import FullScreenLoader from "@/components/molecules/FullScreenLoader";
 
 interface DashboardLayoutProps {
-  children: ReactNode;
+    children: ReactNode;
 }
 
 export default function DashboardLayout(props: DashboardLayoutProps) {
-  const { user } = useAuth();
-  const pathName = usePathname();
-  const router = useRouter();
+    const {user} = useAuth();
+    const pathName = usePathname();
+    const router = useRouter();
 
-  if (pathName === "/") {
-    router.push("/diffusion");
-  }
+    const [isLoading, setIsLoading] = useState(true);
 
-  return user ? <Fragment>{props.children}</Fragment> : <Auth />;
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setIsLoading(false);
+        }, 200);
+        return () => clearInterval(timer);
+    }, []);
+
+
+    if (pathName === "/") {
+        router.push("/diffusion");
+    }
+
+    return user ? <Fragment>{props.children}</Fragment> : <FullScreenLoader isLoading={isLoading}/>;
 }

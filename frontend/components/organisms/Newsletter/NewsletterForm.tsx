@@ -26,7 +26,6 @@ export const NewsletterForm = () => {
   } = useForm<NewsletterForm>({ defaultValues });
 
   const handleFormSubmit = async (data: any) => {
-    console.log(data);
     setLoading(true);
     try {
       const response: APIResponse = await registerNewUserToNewsletter(data);

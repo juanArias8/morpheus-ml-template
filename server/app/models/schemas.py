@@ -16,6 +16,7 @@ class BasicModel(BaseModel):
 class User(BaseModel):
     email: str
     name: str = None
+    bio: str = None
     avatar: str = None
 
     class Config:
@@ -24,6 +25,7 @@ class User(BaseModel):
             "example": {
                 "email": "morpheus@user.com",
                 "name": "Morpheus",
+                "bio": "I am the captain of the Nebuchadnezzar",
                 "avatar": "https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png",  # noqa
             }
         }

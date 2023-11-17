@@ -59,7 +59,6 @@ export const loginWithGoogleFirebase = async (): Promise<any> => {
       auth,
       provider,
     );
-    console.log(userCredential);
     return userCredential.user;
   } catch (error: any) {
     throw new Error(
@@ -92,7 +91,6 @@ export const logout = async () => {
 };
 
 const mapAuthCodeToMessage = (code: string): string => {
-  console.log(code);
   const messageMap: { [key: string]: string } = {
     "auth/wrong-password": "Password provided is not correct",
     "auth/invalid-password": "Password provided is not correct",
@@ -107,6 +105,5 @@ const mapAuthCodeToMessage = (code: string): string => {
     "auth/too-many-requests": "Too many requests",
     "auth/invalid-login-credentials": "Invalid login credentials",
   };
-  console.log(messageMap[code] || AUTH_ERROR);
   return messageMap[code] || AUTH_ERROR;
 };

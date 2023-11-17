@@ -20,6 +20,7 @@ class User(BaseModel):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(64), unique=True, index=True)
     name = Column(String(64), nullable=True)
+    bio = Column(String(512), nullable=True)
     avatar = Column(String(512), nullable=True)
     generations = relationship("Generation", back_populates="user")
 

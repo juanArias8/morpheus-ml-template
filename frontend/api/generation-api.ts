@@ -23,7 +23,6 @@ export const generateImageWithText2Img = async (request: any) => {
 };
 
 export const generateTextWithChatBot = async (request: any) => {
-  console.log("request", request);
   try {
     const response = await axiosClient.post(
       `/generation/text`,

@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 74b36df20ac8
+Revision ID: 0a6f426a2870
 Revises: 
-Create Date: 2023-10-27 22:21:55.026971
+Create Date: 2023-11-17 19:17:41.415777
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '74b36df20ac8'
+revision = '0a6f426a2870'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,13 +22,14 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('name', sa.String(length=64), nullable=True),
+    sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('source', sa.String(length=512), nullable=True),
     sa.Column('description', sa.String(length=512), nullable=True),
     sa.Column('url_docs', sa.String(length=512), nullable=True),
     sa.Column('pipeline', sa.String(length=64), nullable=True),
     sa.Column('extra_params', sa.JSON(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('model_category',
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -61,6 +62,7 @@ def upgrade() -> None:
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('email', sa.String(length=64), nullable=True),
     sa.Column('name', sa.String(length=64), nullable=True),
+    sa.Column('bio', sa.String(length=512), nullable=True),
     sa.Column('avatar', sa.String(length=512), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )

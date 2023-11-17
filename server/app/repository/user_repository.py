@@ -46,8 +46,9 @@ class UserRepository:
         logger.info(f"Creating user {user.email} with role user")
         avatar_seed = user.name if user.name else user.email
         db_user = User(
-            name=user.name,
             email=user.email,
+            name=user.name,
+            bio=user.bio,
             avatar=f"https://ui-avatars.com/api/?name={avatar_seed}&background=random&size=128",
         )
         db.add(db_user)
@@ -61,6 +62,7 @@ class UserRepository:
             raise ValueError(f"User with email {user.email} not found")
 
         db_user.name = user.name
+        db_user.bio = user.bio
         db_user.avatar = user.avatar
         db.commit()
         return db_user
