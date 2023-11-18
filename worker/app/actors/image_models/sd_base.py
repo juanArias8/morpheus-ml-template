@@ -3,6 +3,9 @@ import logging
 from abc import ABC
 from pathlib import Path
 
+import torch
+
+from app.models.schemas import ImageGenerationRequest
 from app.settings.settings import get_settings
 
 settings = get_settings()
@@ -16,7 +19,6 @@ class StableDiffusionAbstract(ABC):
             scheduler: str = settings.default_scheduler,
             controlnet_id: str = None
     ):
-        import torch
         self.logger = logging.getLogger("ray")
         self.generator = None
         self.controlnet = None
@@ -100,11 +102,25 @@ class StableDiffusionAbstract(ABC):
         self.activate_attention_slicing()
         self.activate_xformers()
 
-    def generate_images(self, *args, **kwargs):
-        pass
+    def generate_images(self, request: ImageGenerationRequest):
+        self.logger.info(f"StableDiffusion.generate: request: {request}")
+        self.set_generator(request.generator)
+
+        # Build the pipeline parameters
+        pipe_params = request.dict()
+        if request.image is not None:
+            pipe_params["image"] = request.image
+        if request.mask is not None:
+            pipe_params["mask_image"] = request.mask
+
+        result = self.pipeline(
+            **pipe_params,
+            generator=self.generator,
+        ).images
+        self.logger.info(f"StableDiffusionV2Text2Img.generate: result: {len(result)}")
+        return result
 
     def set_generator(self, generator: int):
-        import torch
         self.generator = torch.Generator(self.generator_device).manual_seed(generator)
 
     def save_model(self):

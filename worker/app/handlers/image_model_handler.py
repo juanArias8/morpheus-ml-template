@@ -8,13 +8,12 @@ from app.actors.image_models.sd_inpainting import StableDiffusionInpainting
 from app.actors.image_models.sd_text_to_img import StableDiffusionText2Img
 from app.integrations.db_client import DBClient
 from app.integrations.s3_client import S3Client
-from app.models.schemas import CategoryEnum, Generation, ModelRequest
+from app.models.schemas import ImageCategoryEnum, Generation, ModelRequest, ImageGenerationRequest
 
 
 @ray.remote
 class ImageModelHandler:
-    def __init__(self, *, endpoint: CategoryEnum, request: ModelRequest):
-        self.endpoint = endpoint
+    def __init__(self, *, request: ImageGenerationRequest):
         self.request = request
         self.logger = logging.getLogger("ray")
         self.generator_args = {
@@ -27,13 +26,13 @@ class ImageModelHandler:
 
     def get_generator(self):
         generators = {
-            CategoryEnum.TEXT_TO_IMAGE: StableDiffusionText2Img,
-            CategoryEnum.IMAGE_TO_IMAGE: StableDiffusionImageToImage,
-            CategoryEnum.INPAINTING: StableDiffusionInpainting,
+            ImageCategoryEnum.TEXT_TO_IMAGE: StableDiffusionText2Img,
+            ImageCategoryEnum.IMAGE_TO_IMAGE: StableDiffusionImageToImage,
+            ImageCategoryEnum.INPAINTING: StableDiffusionInpainting,
         }
-        generator = generators.get(self.endpoint)
+        generator = generators.get(self.request.handler)
         if generator is None:
-            raise ValueError(f"Invalid endpoint: {self.endpoint}")
+            raise ValueError(f"Invalid endpoint: {self.request.handler}")
 
         return generator
 

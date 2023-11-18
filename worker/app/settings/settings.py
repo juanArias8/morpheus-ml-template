@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     models_folder: str = "/mnt/"
 
     # Image generation default config
+    default_image_model_handler: str = "text2img"
     default_scheduler: str = "DDPMScheduler"
     default_pipeline: str = "StableDiffusionXLPipeline"
     default_model: str = "stabilityai/stable-diffusion-xl-base-1.0"
@@ -28,7 +29,7 @@ class Settings(BaseSettings):
     enable_attention_slicing: bool = True
 
     # Text generation default config
-    default_model_handler: str = "chat_glm"
+    default_text_model_handler: str = "chat_glm"
     default_text_pipeline: str = "text-generation"
 
     # Text generation default config

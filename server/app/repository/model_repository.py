@@ -8,9 +8,12 @@ from sqlalchemy.orm import Session
 
 class ModelRepository:
     @classmethod
-    def create_model(cls, *, db: Session, model: MLModelCreate, category: ModelCategory) -> MLModel:
+    def create_model(
+        cls, *, db: Session, model: MLModelCreate, category: ModelCategory
+    ) -> MLModel:
         db_model = MLModel(
             name=model.name,
+            handler=model.handler,
             source=model.source,
             description=model.description,
             url_docs=model.url_docs,
@@ -23,7 +26,9 @@ class ModelRepository:
         return db_model
 
     @classmethod
-    def get_models(cls, *, db: Session, skip: int = 0, limit: int = 100) -> List[MLModel]:
+    def get_models(
+        cls, *, db: Session, skip: int = 0, limit: int = 100
+    ) -> List[MLModel]:
         return db.query(MLModel).offset(skip).limit(limit).all()
 
     @classmethod
@@ -44,9 +49,12 @@ class ModelRepository:
 
     @classmethod
     def update_model(cls, *, db: Session, model: MLModel) -> MLModel:
-        db_model: MLModel = db.query(MLModel).filter(MLModel.source == model.source).first()
+        db_model: MLModel = (
+            db.query(MLModel).filter(MLModel.source == model.source).first()
+        )
 
         db_model.name = model.name
+        db_model.handler = model.handler
         db_model.description = model.description
         db_model.source = model.source
         db_model.url_docs = model.url_docs

@@ -1,6 +1,5 @@
 import logging
 from abc import ABC
-from pathlib import Path
 
 import torch
 import transformers

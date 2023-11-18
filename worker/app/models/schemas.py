@@ -1,15 +1,16 @@
 from enum import Enum
-from typing import Optional, List
+from typing import List
 from uuid import UUID
+
+from pydantic import BaseModel
 
 from app.settings.settings import get_settings
 from app.utils.prompts import generate_random_prompt
-from pydantic import BaseModel
 
 settings = get_settings()
 
 
-class CategoryEnum(str, Enum):
+class ImageCategoryEnum(str, Enum):
     TEXT_TO_IMAGE = "text2img"
     IMAGE_TO_IMAGE = "img2img"
     INPAINTING = "inpainting"
@@ -25,12 +26,15 @@ class TextCategoryEnum(str, Enum):
 class TextGenerationRequest(BaseModel):
     task_id: str = None
     prompt: str = "Hello, Are you there?"
-    handler: str = settings.default_model_handler
+    handler: TextCategoryEnum = settings.default_text_model_handler
     user_id: str = "1111122222"
 
 
 class ImageGenerationRequest(BaseModel):
+    user_id: str = "1111122222"
     task_id: str = None
+
+    # image generation
     prompt: str = "a beautiful cat with blue eyes, artwork, fujicolor, trending on artstation"
     negative_prompt: str = "bad, low res, ugly, deformed"
     width: int = 768
@@ -39,11 +43,15 @@ class ImageGenerationRequest(BaseModel):
     guidance_scale: int = 10
     num_images_per_prompt: int = 1
     generator: int = -1
-    strength: Optional[float] = 0.8
+    strength: float = 0.8
+    image: bytes = None
+    mask: bytes = None
+
+    # settings
+    handler: ImageCategoryEnum = settings.default_text_model_handler
     pipeline: str = settings.default_pipeline
     scheduler: str = settings.default_scheduler
     model_source: str = settings.default_model
-    user_id: str = "1111122222"
 
     class Config:
         schema_extra = {
@@ -52,8 +60,8 @@ class ImageGenerationRequest(BaseModel):
 
 
 class ModelRequest(ImageGenerationRequest):
-    image: Optional[bytes] = None
-    mask: Optional[bytes] = None
+    image: bytes = None
+    mask: bytes = None
 
 
 class Generation(BaseModel):

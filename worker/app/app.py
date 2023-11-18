@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from fastapi import FastAPI, UploadFile, Depends
+from fastapi import FastAPI, Depends
 from fastapi.responses import Response
 from ray import serve
 from ray.util.state import list_nodes
@@ -9,8 +9,7 @@ from ray.util.state import list_nodes
 from app.handlers.image_model_handler import ImageModelHandler
 from app.handlers.text_model_handler import TextModelHandler
 from app.integrations.db_client import DBClient
-from app.models.schemas import ImageGenerationRequest, TextGenerationRequest, CategoryEnum, ModelRequest, \
-    TextCategoryEnum
+from app.models.schemas import ImageGenerationRequest, TextGenerationRequest, ImageCategoryEnum, ModelRequest
 
 app = FastAPI()
 
@@ -20,76 +19,28 @@ app = FastAPI()
 class APIIngress:
     def __init__(self) -> None:
         self.logger = logging.getLogger("ray")
-        self.task_types = [
-            "PENDING_OBJ_STORE_MEM_AVAIL",
-            "PENDING_NODE_ASSIGNMENT",
-            "SUBMITTED_TO_WORKER",
-            "PENDING_ARGS_FETCH",
-            "SUBMITTED_TO_WORKER"
-        ]
 
     @app.get("/")
     async def root(self):
         return "Hello from Morpheus Ray"
 
-    @app.post(f"/{CategoryEnum.TEXT_TO_IMAGE}")
-    async def generate_text2img(
+    @app.post("/image-generation")
+    async def generate_image(
             self,
             request: ImageGenerationRequest = Depends()
     ):
         try:
-            self.logger.info(f"generate_text2img request: {request}")
+            self.logger.info(f"generate_image request: {request}")
             request.task_id = str(uuid.uuid4())
-            model_request = ModelRequest(**request.dict())
-            handler = ImageModelHandler.remote(endpoint=CategoryEnum.TEXT_TO_IMAGE, request=model_request)
+            handler = ImageModelHandler.remote(request=request)
             handler.handle_generation.remote()
-            return Response(content=model_request.task_id)
+            return Response(content=request.task_id)
         except Exception as e:
             error_str = str(e)
             self.logger.error(f"Error in generate_text2img {error_str}")
             return Response(content=error_str)
 
-    @app.post(f"/{CategoryEnum.IMAGE_TO_IMAGE}")
-    async def generate_img2img(
-            self,
-            image: UploadFile,
-            request: ImageGenerationRequest = Depends(),
-    ):
-        try:
-            self.logger.info(f"generate_img2img request: {request}")
-            request.task_id = str(uuid.uuid4())
-            model_request = ModelRequest(**request.dict())
-            model_request.image = await image.read()
-            handler = ImageModelHandler.remote(endpoint=CategoryEnum.IMAGE_TO_IMAGE, request=model_request)
-            handler.handle_generation.remote()
-            return Response(content=model_request.task_id)
-        except Exception as e:
-            error_str = str(e)
-            self.logger.error(f"Error in generate_img2_img {error_str}")
-            return Response(content=error_str)
-
-    @app.post(f"/{CategoryEnum.INPAINTING}")
-    async def generate_inpainting(
-            self,
-            image: UploadFile,
-            mask: UploadFile,
-            request: ImageGenerationRequest = Depends(),
-    ):
-        try:
-            self.logger.info(f"generate_inpainting request: {request}")
-            request.task_id = str(uuid.uuid4())
-            model_request = ModelRequest(**request.dict())
-            model_request.image = await image.read()
-            model_request.mask = await mask.read()
-            handler = ImageModelHandler.remote(endpoint=CategoryEnum.INPAINTING, request=model_request)
-            handler.handle_generation.remote()
-            return Response(content=model_request.task_id)
-        except Exception as e:
-            error_str = str(e)
-            self.logger.error(f"Error in generate_inpainting {error_str}")
-            return Response(content=error_str)
-
-    @app.post(f"/text")
+    @app.post(f"/text-generation")
     async def generate_text(
             self,
             request: TextGenerationRequest = Depends(),

@@ -2,7 +2,7 @@ import logging
 
 import ray
 
-from app.actors.text_models.common.text_base import TextGenerationAbstract
+from app.actors.text_models.text_base import TextGenerationAbstract
 from app.models.schemas import TextGenerationRequest
 from app.settings.settings import get_settings
 

@@ -32,9 +32,9 @@ class Generation(BaseModel):
     status = Column(
         Enum("PENDING", "COMPLETED", "FAILED", name="generation_status"),
         nullable=False,
-        default="PENDING"
+        default="PENDING",
     )
-    user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("user.id"))
     user = relationship("User", back_populates="generations")
 
 
@@ -45,9 +45,7 @@ class ModelCategory(BaseModel):
     name = Column(String(64))
     description = Column(String(512), nullable=True)
     models = relationship(
-        "MLModel",
-        secondary="model_category_association",
-        back_populates="categories"
+        "MLModel", secondary="model_category_association", back_populates="categories"
     )
 
 
@@ -56,14 +54,13 @@ class MLModel(BaseModel):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(64), nullable=False, unique=True)
+    handler = Column(String(64), nullable=False)
     source = Column(String(512))
     description = Column(String(512), nullable=True)
     url_docs = Column(String(512), nullable=True)
     pipeline = Column(String(64), nullable=True)
     categories = relationship(
-        "ModelCategory",
-        secondary="model_category_association",
-        back_populates="models"
+        "ModelCategory", secondary="model_category_association", back_populates="models"
     )
     extra_params = Column(JSON, nullable=True)
 

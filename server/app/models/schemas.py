@@ -39,7 +39,9 @@ class TextGenerationRequest(BaseModel):
 
 class ImageGenerationRequest(BaseModel):
     task_id: UUID = None
-    prompt: str = "a beautiful cat with blue eyes, artwork, fujicolor, trending on artstation"
+    prompt: str = (
+        "a beautiful cat with blue eyes, artwork, fujicolor, trending on artstation"
+    )
     negative_prompt: str = "bad, low res, ugly, deformed"
     width: int = 768
     height: int = 768
@@ -94,6 +96,7 @@ class ModelCategory(BasicModel):
 class MLModel(BasicModel):
     id: UUID = None
     name: str
+    handler: str
     source: str
     description: str = None
     url_docs: str = None
