@@ -12,11 +12,11 @@ RAY_BACKEND_URL = settings.ray_backend_url
 
 
 def send_request_to_ray_server(
-        *,
-        endpoint: str,
-        request: Union[TextGenerationRequest, ImageGenerationRequest],
-        image: bytes = None,
-        mask: bytes = None
+    *,
+    endpoint: str,
+    request: Union[TextGenerationRequest, ImageGenerationRequest],
+    image: bytes = None,
+    mask: bytes = None,
 ) -> str:
     files = {}
     if image:
@@ -88,30 +88,44 @@ def ray_worker_number() -> int:
 class RayAIClient:
     @staticmethod
     def generate_text2img_images(*, request: ImageGenerationRequest) -> str:
-        logger.info(f"Running generate_img2img_images process with request: {request}")
-        task_id = send_request_to_ray_server(endpoint="text2img", request=request)
+        logger.info(f"generate_img2img_images process with request: {request}")
+        task_id = send_request_to_ray_server(
+            endpoint="image-generation", request=request
+        )
         return str(task_id)
 
     @staticmethod
-    def generate_img2img_images(*, request: ImageGenerationRequest, image: bytes) -> str:
-        logger.info(f"Running generate_img2img_images process with request: {request}")
-        task_id = send_request_to_ray_server(endpoint="img2img", request=request, image=image)
+    def generate_img2img_images(
+        *, request: ImageGenerationRequest, image: bytes
+    ) -> str:
+        logger.info(f"generate_img2img_images process with request: {request}")
+        task_id = send_request_to_ray_server(
+            endpoint="image-generation", request=request, image=image
+        )
         return str(task_id)
 
     @staticmethod
-    def generate_inpainting_images(*, request: ImageGenerationRequest, image: bytes, mask: bytes) -> str:
-        logger.info(f"Running generate_inpainting_images process with request: {request}")
-        task_id = send_request_to_ray_server(endpoint="inpainting", request=request, image=image, mask=mask)
+    def generate_inpainting_images(
+        *, request: ImageGenerationRequest, image: bytes, mask: bytes
+    ) -> str:
+        logger.info(f"generate_inpainting_images process with request: {request}")
+        task_id = send_request_to_ray_server(
+            endpoint="image-generation", request=request, image=image, mask=mask
+        )
         return str(task_id)
 
     @staticmethod
     def generate_magic_prompt(*, request: TextGenerationRequest) -> str:
-        logger.info(f"Running generate_magic_prompt process with request: {request}")
-        task_id = send_request_to_ray_server(endpoint="magic_prompt", request=request)
+        logger.info(f"generate_magic_prompt process with request: {request}")
+        task_id = send_request_to_ray_server(
+            endpoint="text-generation", request=request
+        )
         return str(task_id)
 
     @staticmethod
     def generate_text_with_chatbot(*, request: TextGenerationRequest) -> str:
-        logger.info(f"Running generate_text_with_chatbot process with request: {request}")
-        task_id = send_request_to_ray_server(endpoint="text", request=request)
+        logger.info(f"generate_text_with_chatbot process with request: {request}")
+        task_id = send_request_to_ray_server(
+            endpoint="text-generation", request=request
+        )
         return str(task_id)

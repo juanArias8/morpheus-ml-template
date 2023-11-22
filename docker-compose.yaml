@@ -75,7 +75,7 @@ services:
       - "8000:8000"
       - "8265:8265"
     volumes:
-      - sd_model:/mnt/
+      - ml_models:/mnt/
     depends_on:
       server:
         condition: service_started
@@ -103,5 +103,4 @@ services:
 
 volumes:
   pg_data:
-  sd_model:
-    name: "models"
+  ml_models:

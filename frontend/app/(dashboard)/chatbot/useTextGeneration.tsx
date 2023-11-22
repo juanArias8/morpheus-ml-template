@@ -7,12 +7,13 @@ import { useAlert } from "@/components/organisms/AlertMessage/AlertMessageContex
 
 export interface ChatBotRequest {
   prompt: string;
-  model_name: string;
+  context?: string;
+  handler: string;
 }
 
 export const defaultConfig: ChatBotRequest = {
   prompt: "hey, are you there?",
-  model_name: "ChatGLM-6B",
+  handler: "text-conversational-chat-glm",
 };
 
 const useTextGeneration = () => {
@@ -20,11 +21,15 @@ const useTextGeneration = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Array<string>>([]);
 
-  const generateText = async (prompt: string) => {
+  const generateText = async (
+    prompt: string,
+    handler: string = defaultConfig.handler,
+  ): Promise<void> => {
     setLoading(true);
     const data: ChatBotRequest = {
       ...defaultConfig,
       prompt: prompt,
+      handler: handler || defaultConfig.handler,
     };
 
     try {

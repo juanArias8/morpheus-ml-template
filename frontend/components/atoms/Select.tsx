@@ -1,52 +1,31 @@
 "use client";
-import { ComponentPropsWithoutRef } from "react";
+import { Model } from "@/lib/models";
 
-interface SelectInputProps extends ComponentPropsWithoutRef<"select"> {
-  name: string;
-  label: string;
-  options: string[];
-  register?: any;
-  onChange?: any;
-  validationSchema?: any;
-  errors?: any;
-  selectedValues?: string[]; // Changed to an array
+interface SelectInputProps {
+  options: Model[];
+  value?: string;
+  setValue: (value: string) => void;
 }
 
-export const Select = (props: SelectInputProps) => {
-  const getInputError = () => {
-    if (!props.errors) return null;
-    if (props.errors.type === "required") return "This field is required";
+export const SelectModel = (props: SelectInputProps) => {
+  const handleChange = (event: any) => {
+    console.log(event.target.value);
+    props.setValue(event.target.value);
   };
 
   return (
-    <div className="form-control w-full">
-      <label className="label">
-        <span className="label-text">
-          {props.label} {props.validationSchema?.required && "*"}
-        </span>
-      </label>
+    <select
+      className="select select-bordered w-full max-w-xs"
+      onChange={handleChange}
+      value={props.value}
+    >
+      <option disabled>Choose a model</option>
 
-      <select
-        className="select select-bordered"
-        name={props.name}
-        {...(props.register
-          ? props.register(props.name, props.validationSchema)
-          : {})}
-        value={props.selectedValues} // Updated to handle array
-        onChange={props?.onChange}
-      >
-        {props.options.map((option, index) => (
-          <option key={`${option}-${index}`} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-
-      {props.errors && (
-        <label className="label">
-          <span className="error text-error text-sm">{getInputError()}</span>
-        </label>
-      )}
-    </div>
+      {props.options.map((model: Model) => (
+        <option key={model.handler} value={model.handler}>
+          {model.name}
+        </option>
+      ))}
+    </select>
   );
 };

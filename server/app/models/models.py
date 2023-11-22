@@ -1,10 +1,11 @@
 import uuid
 
-from app.config.database.database import Base
 from sqlalchemy import ARRAY, DateTime, Enum, Column, String, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
+from app.config.database.database import Base
 
 
 class BaseModel(Base):
@@ -42,35 +43,23 @@ class ModelCategory(BaseModel):
     __tablename__ = "model_category"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    key = Column(String(64), unique=True)
     name = Column(String(64))
     description = Column(String(512), nullable=True)
-    models = relationship(
-        "MLModel", secondary="model_category_association", back_populates="categories"
-    )
+    models = relationship("MLModel", back_populates="category")
 
 
 class MLModel(BaseModel):
     __tablename__ = "ml_model"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(64), nullable=False, unique=True)
-    handler = Column(String(64), nullable=False)
-    source = Column(String(512))
+    name = Column(String(64), nullable=False)
+    handler = Column(String(64), nullable=False, unique=True)
     description = Column(String(512), nullable=True)
     url_docs = Column(String(512), nullable=True)
-    pipeline = Column(String(64), nullable=True)
-    categories = relationship(
-        "ModelCategory", secondary="model_category_association", back_populates="models"
-    )
     extra_params = Column(JSON, nullable=True)
-
-
-class ModelCategoryAssociation(BaseModel):
-    __tablename__ = "model_category_association"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    model_id = Column(UUID(as_uuid=True), ForeignKey("ml_model.id"))
     category_id = Column(UUID(as_uuid=True), ForeignKey("model_category.id"))
+    category = relationship("ModelCategory", back_populates="models")
 
 
 class Sampler(BaseModel):

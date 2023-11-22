@@ -4,22 +4,21 @@ export interface APIResponse {
   message?: string;
 }
 
+export interface ModelCategory {
+  key: string;
+  name: string;
+  description?: string;
+}
+
 export interface Model {
   id?: string;
   name: string;
-  source: string;
+  handler: string;
   description?: string;
   url_docs?: string;
-  categories: any[];
-  is_active: boolean;
-  kind: string | any;
+  category: ModelCategory;
   extra_params?: any;
-}
-
-export interface ModelCategory {
-  id?: string;
-  name: string;
-  description?: string;
+  is_active?: boolean;
 }
 
 export interface User {

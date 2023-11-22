@@ -3,34 +3,60 @@ import uuid
 
 import ray
 
-from app.actors.image_models.sd_img_to_img import StableDiffusionImageToImage
-from app.actors.image_models.sd_inpainting import StableDiffusionInpainting
-from app.actors.image_models.sd_text_to_img import StableDiffusionText2Img
+from app.actors.image_models.sd_img_to_img import (
+    StableDiffusionXLImageToImage,
+    StableDiffusionV2ImageToImage,
+    InstructionPix2PixImageToImage
+)
+from app.actors.image_models.sd_inpainting import (
+    StableDiffusionXLInpainting,
+    RunwayStableDiffusionInpainting,
+    StableDiffusionV2Inpainting
+)
+from app.actors.image_models.sd_text_to_img import (
+    StableDiffusionXLText2Img,
+    StableDiffusionRunwayTextToImage,
+    StableDiffusionV2TextToImage,
+    OpenjourneyTextToImage
+)
 from app.integrations.db_client import DBClient
 from app.integrations.s3_client import S3Client
-from app.models.schemas import ImageCategoryEnum, Generation, ModelRequest, ImageGenerationRequest
+from app.models.schemas import ImageHandlerEnum, Generation, ImageGenerationRequest
+
+generators = {
+    # Text to Image
+    ImageHandlerEnum.TEXT_TO_IMAGE_SDXL: StableDiffusionXLText2Img,
+    ImageHandlerEnum.TEXT_TO_IMAGE_RUNWAY: StableDiffusionRunwayTextToImage,
+    ImageHandlerEnum.TEXT_TO_IMAGE_SDV2: StableDiffusionV2TextToImage,
+    ImageHandlerEnum.TEXT_TO_IMAGE_OPENJOURNEY: OpenjourneyTextToImage,
+
+    # Image to Image
+    ImageHandlerEnum.IMAGE_TO_IMAGE_SDXL: StableDiffusionXLImageToImage,
+    ImageHandlerEnum.IMAGE_TO_IMAGE_PIX2PIX: InstructionPix2PixImageToImage,
+    ImageHandlerEnum.IMAGE_TO_IMAGE_SDV2: StableDiffusionV2ImageToImage,
+
+    # Inpainting
+    ImageHandlerEnum.INPAINTING_SDXL: StableDiffusionXLInpainting,
+    ImageHandlerEnum.INPAINTING_RUNWAY: RunwayStableDiffusionInpainting,
+    ImageHandlerEnum.INPAINTING_SDV2: StableDiffusionV2Inpainting,
+}
 
 
-@ray.remote
+@ray.remote(num_cpus=1)
 class ImageModelHandler:
     def __init__(self, *, request: ImageGenerationRequest):
         self.request = request
         self.logger = logging.getLogger("ray")
         self.generator_args = {
-            "pipeline": self.request.pipeline,
-            "model_id": self.request.model_source,
             "scheduler": self.request.scheduler,
         }
-        self.generator = self.get_generator().remote(**self.generator_args)
+        self.generator = self.get_generator().remote(scheduler=self.request.scheduler)
         self.s3_client = S3Client()
 
     def get_generator(self):
-        generators = {
-            ImageCategoryEnum.TEXT_TO_IMAGE: StableDiffusionText2Img,
-            ImageCategoryEnum.IMAGE_TO_IMAGE: StableDiffusionImageToImage,
-            ImageCategoryEnum.INPAINTING: StableDiffusionInpainting,
-        }
         generator = generators.get(self.request.handler)
+        self.logger.info(f"Using handler: {self.request.handler}")
+        self.logger.info(f"Using generator: {generator}")
         if generator is None:
             raise ValueError(f"Invalid endpoint: {self.request.handler}")
 

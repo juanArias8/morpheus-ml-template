@@ -9,6 +9,12 @@ interface GenerateButtonProps {
 }
 
 const GenerateButton = (props: GenerateButtonProps) => {
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Enter") {
+      props.onClick();
+    }
+  };
+
   return (
     <div className="bg-base-300 fixed bottom-0 left-0 right-0 z-10 mt-10 flex w-auto flex-col rounded-md p-5 !min-w-[320px]">
       <textarea
@@ -16,6 +22,7 @@ const GenerateButton = (props: GenerateButtonProps) => {
         placeholder="Write the first paragraph of your story."
         value={props.promptValue}
         onChange={(e) => props.setPromptValue(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
 
       <Button

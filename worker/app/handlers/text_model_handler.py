@@ -3,15 +3,52 @@ import uuid
 
 import ray
 
-from app.actors.text_models.alpaca import AlpacaTextGeneration
-from app.actors.text_models.chat_glm import ChatGLMTextGeneration
-from app.actors.text_models.llama2 import Llama2TextGeneration
-from app.actors.text_models.magic_prompt import StableDiffusionMagicPrompt
+from app.actors.text_models.question_answering import FalconQuestionAnswering, DistilBERTQuestionAnswering
+from app.actors.text_models.text2text_generation import GoogleFlanT5, Alpaca
+from app.actors.text_models.text_classification import (
+    BARTClassificationNLI,
+    BARTClassification,
+    ToxicBERTClassification,
+    RobertaClassification
+)
+from app.actors.text_models.text_conversational import FacebookBlenderBot, ChatGLMTextGeneration
+from app.actors.text_models.text_generation import GPT2TextGeneration, Phi15TextGeneration, GPTModel, StableBeluga7B
+from app.actors.text_models.text_summarization import BARTLargeCNN, DistilBARTSummarization
 from app.integrations.db_client import DBClient
-from app.models.schemas import Generation, TextCategoryEnum, TextGenerationRequest
+from app.models.schemas import Generation, TextHandlerEnum, TextGenerationRequest
+
+generators = {
+    # Question Answering
+    TextHandlerEnum.QUESTION_ANSWERING_FALCON: FalconQuestionAnswering,
+    TextHandlerEnum.QUESTION_ANSWERING_DISTILBERT: DistilBERTQuestionAnswering,
+
+    # Text to Text
+    TextHandlerEnum.TEXT_TO_TEXT_GOOGLE_FLAN: GoogleFlanT5,
+    TextHandlerEnum.TEXT_TO_TEXT_ALCAPA: Alpaca,
+
+    # Text Classification
+    TextHandlerEnum.TEXT_CLASSIFICATION_BART_NLI: BARTClassificationNLI,
+    TextHandlerEnum.TEXT_CLASSIFICATION_BART: BARTClassification,
+    TextHandlerEnum.TEXT_CLASSIFICATION_TOXIC_BERT: ToxicBERTClassification,
+    TextHandlerEnum.TEXT_CLASSIFICATION_ROBERTA: RobertaClassification,
+
+    # Text Conversational
+    TextHandlerEnum.TEXT_CONVERSATIONAL_BLENDERBOT: FacebookBlenderBot,
+    TextHandlerEnum.TEXT_CONVERSATIONAL_CHAT_GLM: ChatGLMTextGeneration,
+
+    # Text Generation
+    TextHandlerEnum.TEXT_GENERATION_GPT2: GPT2TextGeneration,
+    TextHandlerEnum.TEXT_GENERATION_PHI15: Phi15TextGeneration,
+    TextHandlerEnum.TEXT_GENERATION_GPT: GPTModel,
+    TextHandlerEnum.TEXT_GENERATION_STABLE_BELUGA: StableBeluga7B,
+
+    # Text Summarization
+    TextHandlerEnum.TEXT_SUMMARIZATION_BART: BARTLargeCNN,
+    TextHandlerEnum.TEXT_SUMMARIZATION_DISTIL_BART: DistilBARTSummarization,
+}
 
 
-@ray.remote
+@ray.remote(num_cpus=1)
 class TextModelHandler:
     def __init__(self, *, request: TextGenerationRequest):
         self.request = request
@@ -19,13 +56,10 @@ class TextModelHandler:
         self.generator = self.get_generator().remote()
 
     def get_generator(self):
-        generators = {
-            TextCategoryEnum.MAGIC_PROMPT: StableDiffusionMagicPrompt,
-            TextCategoryEnum.LLAMA2: Llama2TextGeneration,
-            TextCategoryEnum.ALPACA: AlpacaTextGeneration,
-            TextCategoryEnum.CHAT_GLM: ChatGLMTextGeneration,
-        }
+
         generator = generators.get(self.request.handler)
+        print(f"Using handler: {self.request.handler}")
+        print(f"Using generator: {generator}")
         if generator is None:
             raise ValueError(f"Invalid handler: {self.request.handler}")
         return generator

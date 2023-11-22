@@ -102,22 +102,32 @@ class StableDiffusionAbstract(ABC):
         self.activate_attention_slicing()
         self.activate_xformers()
 
-    def generate_images(self, request: ImageGenerationRequest):
+    def generate(self, request: ImageGenerationRequest):
         self.logger.info(f"StableDiffusion.generate: request: {request}")
         self.set_generator(request.generator)
 
         # Build the pipeline parameters
-        pipe_params = request.dict()
+        pipe_params = dict()
+        pipe_params["prompt"] = request.prompt
+        pipe_params["negative_prompt"] = request.negative_prompt
+        pipe_params["width"] = request.width
+        pipe_params["height"] = request.height
+        pipe_params["num_inference_steps"] = request.num_inference_steps
+        pipe_params["guidance_scale"] = request.guidance_scale
+        pipe_params["num_images_per_prompt"] = request.num_images_per_prompt
+        pipe_params["generator"] = self.generator
+
+        if request.strength is not None:
+            pipe_params["strength"] = request.strength
         if request.image is not None:
             pipe_params["image"] = request.image
         if request.mask is not None:
             pipe_params["mask_image"] = request.mask
 
-        result = self.pipeline(
-            **pipe_params,
-            generator=self.generator,
-        ).images
+        self.logger.info(pipe_params)
+        result = self.pipeline(**pipe_params).images
         self.logger.info(f"StableDiffusionV2Text2Img.generate: result: {len(result)}")
+        torch.cuda.empty_cache()
         return result
 
     def set_generator(self, generator: int):

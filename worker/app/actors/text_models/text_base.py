@@ -1,5 +1,5 @@
-import logging
 from abc import ABC
+from pathlib import Path
 
 import torch
 import transformers
@@ -17,10 +17,8 @@ class TextGenerationAbstract(ABC):
             pipeline: str = "AutoModelForCausalLM",
             tokenizer: str = "AutoTokenizer",
     ):
-        self.logger = logging.getLogger("ray")
-
-        # Get the model source, path for local model, model_id for hugin face remote model
-        # self.cache_dir = Path(settings.models_folder)
+        # Models are saved in the models folder
+        self.cache_dir = Path(settings.models_folder)
 
         if torch.cuda.is_available() and torch.backends.cuda.is_built():
             print("PyTorch CUDA backend is available, enabling")
@@ -37,7 +35,7 @@ class TextGenerationAbstract(ABC):
         self.pipeline = self.pipeline_import.from_pretrained(
             pretrained_model_name_or_path=model_id,
             trust_remote_code=True,
-            # cache_dir=self.cache_dir,
+            cache_dir=self.cache_dir,
         )
         self.pipeline.to(self.device)
 
@@ -46,7 +44,7 @@ class TextGenerationAbstract(ABC):
         self.tokenizer = self.tokenizer_import.from_pretrained(
             pretrained_model_name_or_path=model_id,
             trust_remote_code=True,
-            # cache_dir=self.cache_dir,
+            cache_dir=self.cache_dir,
         )
 
     def generate(self, request: TextGenerationRequest):
@@ -54,4 +52,5 @@ class TextGenerationAbstract(ABC):
         encoded_input = encoded_input.to(self.device)
         output = self.pipeline.generate(**encoded_input)
         generated_text = self.tokenizer.decode(output[0], skip_special_tokens=True)
+        torch.cuda.empty_cache()
         return generated_text

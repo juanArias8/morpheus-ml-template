@@ -5,10 +5,10 @@ from pydantic import PostgresDsn, BaseSettings
 
 class Settings(BaseSettings):
     # PostgreSQL database config
-    postgres_user: str = "postgres"
-    postgres_password: str = "password"
     postgres_host: str = "postgres"
     postgres_port: str = "5432"
+    postgres_user: str = "postgres"
+    postgres_password: str = "password"
     postgres_db: str = "morpheus"
 
     # backend config

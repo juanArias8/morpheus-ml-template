@@ -33,7 +33,7 @@
     }
 
     .main-section {
-        @apply flex flex-col min-w-[320px] p-5 pb-10 bg-neutral overflow-y-auto xl:p-24 xl:h-[92vh] xl:pb-[250px];
+        @apply flex flex-col min-w-[320px] p-5 bg-neutral overflow-y-auto xl:p-24 xl:h-[92vh];
     }
 
     .btn-primary {

@@ -3,6 +3,7 @@ from loguru import logger
 from app.config.database.database import get_db
 from app.config.database.init_data.categories import all_categories
 from app.config.database.init_data.diffusion_models import diffusion_models
+from app.config.database.init_data.llm_models import llm_models
 from app.config.database.init_data.samplers import samplers
 from app.config.database.init_data.users import morpheus_user
 from app.models.schemas import ModelCategory, User, MLModel, Sampler
@@ -31,15 +32,14 @@ def init_users():
 
 def init_categories():
     for category in all_categories:
+        category_key = category.get("key", None)
         category_name = category.get("name", None)
-        db_category = categories_repository.get_category_by_name(
-            db=db, name=category_name
-        )
+        db_category = categories_repository.get_category_by_key(db=db, key=category_key)
         if not db_category:
             categories_repository.create_category(
                 db=db, category=ModelCategory(**category)
             )
-        logger.info(f"Category Collection {category_name} created")
+        logger.info(f"Category {category_name} created")
 
 
 def init_samplers():
@@ -54,17 +54,25 @@ def init_samplers():
 
 
 def init_models():
-    for model in diffusion_models:
+    all_models = diffusion_models + llm_models
+    for model in all_models:
+        model_handler = model.get("handler", None)
         model_name = model.get("name", None)
-        db_model = model_repository.get_model_by_name(db=db, model_name=model_name)
+        db_model = model_repository.get_model_by_handler(db=db, handler=model_handler)
+
         if not db_model:
             category = model.get("category", None)
             if not category:
                 pass
-            category_name = category.get("name", None)
-            db_category = categories_repository.get_category_by_name(
-                db=db, name=category_name
+
+            category_key = category.get("key", None)
+            db_category = categories_repository.get_category_by_key(
+                db=db, key=category_key
             )
+            print("---------------------------------------------")
+            print(db_category)
+            print(MLModel(**model))
+            print("---------------------------------------------")
             model_repository.create_model(
                 db=db, model=MLModel(**model), category=db_category
             )

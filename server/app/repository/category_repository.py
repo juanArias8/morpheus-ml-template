@@ -11,6 +11,7 @@ class ModelCategoryRepository:
     @classmethod
     def create_category(cls, *, db: Session, category: ModelCategory) -> ModelCategory:
         db_category = ModelCategory(
+            key=category.key,
             name=category.name,
             description=category.description,
         )
@@ -20,7 +21,9 @@ class ModelCategoryRepository:
         return db_category
 
     @classmethod
-    def get_categories(cls, *, db: Session, skip: int = 0, limit: int = 100) -> List[ModelCategory]:
+    def get_categories(
+        cls, *, db: Session, skip: int = 0, limit: int = 100
+    ) -> List[ModelCategory]:
         return db.query(ModelCategory).offset(skip).limit(limit).all()
 
     @classmethod
@@ -28,11 +31,13 @@ class ModelCategoryRepository:
         return db.query(ModelCategory).filter(ModelCategory.id == category_id).first()
 
     @classmethod
-    def get_category_by_name(cls, *, db: Session, name: str) -> ModelCategory:
-        return db.query(ModelCategory).filter(ModelCategory.name == name).first()
+    def get_category_by_key(cls, *, db: Session, key: str) -> ModelCategory:
+        return db.query(ModelCategory).filter(ModelCategory.key == key).first()
 
     @classmethod
-    def get_categories_by_model(cls, *, db: Session, model: MLModel) -> List[ModelCategory]:
+    def get_categories_by_model(
+        cls, *, db: Session, model: MLModel
+    ) -> List[ModelCategory]:
         model = db.query(MLModelDB).filter(MLModelDB.id == model.id).first()
         return model.categories
 

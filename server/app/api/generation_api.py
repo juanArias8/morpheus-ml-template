@@ -17,16 +17,18 @@ generator_services = GenerationServices()
     response_description="generate images from stable diffusion model by a request",
 )
 async def generate_text2img_images(
-        request: ImageGenerationRequest = Depends(),
-        db=Depends(get_db),
-        user=Depends(get_user)
+    request: ImageGenerationRequest = Depends(),
+    db=Depends(get_db),
+    user=Depends(get_user),
 ):
-    logger.info(f"Generating text2img images for request {request} and user {user['email']}")
+    logger.info(f"generate_text2img_images for request {request}")
     try:
-        task_id = generator_services.generate_text2img_images(db=db, request=request, email=user["email"])
+        task_id = generator_services.generate_text2img_images(
+            db=db, request=request, email=user["email"]
+        )
         return {"task_id": task_id}
     except UserNotFoundError as e:
-        return HTTPException(status_code=404, detail=str(e))
+        return HTTPException(status_code=401, detail=str(e))
     except ModelNotFoundError as e:
         return HTTPException(status_code=404, detail=str(e))
     except Exception as e:
@@ -39,18 +41,20 @@ async def generate_text2img_images(
     response_description="generate images from stable diffusion model by a request and an image.",
 )
 async def generate_img2img_images(
-        request: ImageGenerationRequest = Depends(),
-        image: UploadFile = File(...),
-        db=Depends(get_db),
-        user=Depends(get_user),
+    request: ImageGenerationRequest = Depends(),
+    image: UploadFile = File(...),
+    db=Depends(get_db),
+    user=Depends(get_user),
 ):
-    logger.info(f"Generating img2img images for request {request} and user {user['email']}")
+    logger.info(f"generate_img2img_images for request {request}")
     try:
         image = await image.read()
-        task_id = generator_services.generate_img2img_images(db=db, request=request, image=image, email=user["email"])
+        task_id = generator_services.generate_img2img_images(
+            db=db, request=request, image=image, email=user["email"]
+        )
         return {"task_id": task_id}
     except UserNotFoundError as e:
-        return HTTPException(status_code=404, detail=str(e))
+        return HTTPException(status_code=401, detail=str(e))
     except ModelNotFoundError as e:
         return HTTPException(status_code=404, detail=str(e))
     except ImageNotProvidedError as e:
@@ -65,22 +69,22 @@ async def generate_img2img_images(
     response_description="generate images from stable diffusion model by a request, an image and a mask.",
 )
 async def generate_inpainting_images(
-        request: ImageGenerationRequest = Depends(),
-        image: UploadFile = File(...),
-        mask: UploadFile = File(...),
-        db=Depends(get_db),
-        user=Depends(get_user),
+    request: ImageGenerationRequest = Depends(),
+    image: UploadFile = File(...),
+    mask: UploadFile = File(...),
+    db=Depends(get_db),
+    user=Depends(get_user),
 ):
-    logger.info(f"Generating inpainting images for request {request} and user {user['email']}")
+    logger.info(f"generate_inpainting_images for request {request}")
     try:
         image = await image.read()
         mask = await mask.read()
         task_id = generator_services.generate_inpainting_images(
-            db=db, request=request, image=image, mask=mask, email=user["email"])
-
+            db=db, request=request, image=image, mask=mask, email=user["email"]
+        )
         return {"task_id": task_id}
     except UserNotFoundError as e:
-        return HTTPException(status_code=404, detail=str(e))
+        return HTTPException(status_code=401, detail=str(e))
     except ModelNotFoundError as e:
         return HTTPException(status_code=404, detail=str(e))
     except ImageNotProvidedError as e:
@@ -95,19 +99,18 @@ async def generate_inpainting_images(
     response_description="Generate text from LLM model by a request.",
 )
 async def generate_text(
-        request: TextGenerationRequest = Depends(),
-        db=Depends(get_db),
-        user=Depends(get_user),
+    request: TextGenerationRequest = Depends(),
+    db=Depends(get_db),
+    user=Depends(get_user),
 ):
-    logger.info(f"Generating text from LLM model for request {request} and user {user['email']}")
+    logger.info(f"generate_text request {request} and user {user['email']}")
     try:
         task_id = generator_services.generate_text_with_chatbot(
             db=db, request=request, email=user["email"]
         )
-
         return {"task_id": task_id}
     except UserNotFoundError as e:
-        return HTTPException(status_code=404, detail=str(e))
+        return HTTPException(status_code=401, detail=str(e))
     except ModelNotFoundError as e:
         return HTTPException(status_code=404, detail=str(e))
     except ImageNotProvidedError as e:
@@ -123,7 +126,7 @@ async def generate_text(
 )
 async def get_generation_result(task_id, db=Depends(get_db), user=Depends(get_user)):
     try:
-        logger.info(f"Getting image generation result for task {task_id} and user {user['email']}")
+        logger.info(f"get_generation_result for task {task_id}")
         generation = generator_services.get_generation_result(db=db, task_id=task_id)
         return generation
     except Exception as e:

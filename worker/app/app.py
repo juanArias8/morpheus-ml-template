@@ -9,7 +9,7 @@ from ray.util.state import list_nodes
 from app.handlers.image_model_handler import ImageModelHandler
 from app.handlers.text_model_handler import TextModelHandler
 from app.integrations.db_client import DBClient
-from app.models.schemas import ImageGenerationRequest, TextGenerationRequest, ImageCategoryEnum, ModelRequest
+from app.models.schemas import ImageGenerationRequest, TextGenerationRequest
 
 app = FastAPI()
 
@@ -40,7 +40,7 @@ class APIIngress:
             self.logger.error(f"Error in generate_text2img {error_str}")
             return Response(content=error_str)
 
-    @app.post(f"/text-generation")
+    @app.post("/text-generation")
     async def generate_text(
             self,
             request: TextGenerationRequest = Depends(),
@@ -48,8 +48,8 @@ class APIIngress:
         try:
             self.logger.info(f"generate_text request: {request}")
             request.task_id = str(uuid.uuid4())
-            handler = TextModelHandler.remote(handler=request.handler)
-            handler.handle_generation.remote(request=request)
+            handler = TextModelHandler.remote(request=request)
+            handler.handle_generation.remote()
             return Response(content=request.task_id)
         except Exception as e:
             error_str = str(e)

@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import List
 from uuid import UUID
 
-from app.config.settings import get_settings
 from pydantic import BaseModel
+
+from app.config.settings import get_settings
 
 settings = get_settings()
 
@@ -33,15 +34,17 @@ class User(BaseModel):
 
 class TextGenerationRequest(BaseModel):
     task_id: UUID = None
+    handler: str = "text2text-google-flan"
     prompt: str = "Hey, Are you there?"
-    model_name: str = "ChatGLM-6B"
+    context: str = None
 
 
 class ImageGenerationRequest(BaseModel):
     task_id: UUID = None
-    prompt: str = (
-        "a beautiful cat with blue eyes, artwork, fujicolor, trending on artstation"
-    )
+    handler: str = "text2img-sdxl"
+    sampler: str = "DDPMScheduler"
+
+    prompt: str = "a beautiful cat with blue eyes, artwork, trending on artstation"
     negative_prompt: str = "bad, low res, ugly, deformed"
     width: int = 768
     height: int = 768
@@ -49,9 +52,6 @@ class ImageGenerationRequest(BaseModel):
     guidance_scale: int = 10
     num_images_per_prompt: int = 1
     generator: int = -1
-    strength: Optional[float] = 0.75
-    sampler: str = "DDPMScheduler"
-    model_name: str = "Stable Diffusion XL Text2Img"
 
 
 class Generation(BaseModel):
@@ -79,7 +79,8 @@ class Sampler(BaseModel):
 
 class ModelCategory(BasicModel):
     id: UUID = None
-    name: str
+    key: str
+    name: str = None
     description: str = None
 
     class Config:
@@ -97,10 +98,9 @@ class MLModel(BasicModel):
     id: UUID = None
     name: str
     handler: str
-    source: str
     description: str = None
     url_docs: str = None
-    categories: List[ModelCategory] = None
+    category: ModelCategory = None
     extra_params: dict = None
     is_active: bool = True
 
@@ -108,12 +108,11 @@ class MLModel(BasicModel):
         orm_mode = True
         schema_extra = {
             "example": {
+                "id": "c0a80121-7ac0-11eb-9439-0242ac130002",
                 "name": "Model Name",
-                "source": "https://modelurl.com",
-                "kind": "diffusion",
+                "handler": "text2img",
                 "description": "Model description",
-                "url_docs": "https://modeldocs.com",
-                "is_active": True,
+                "url_docs": "https://docs.morpheus.com",
             }
         }
 

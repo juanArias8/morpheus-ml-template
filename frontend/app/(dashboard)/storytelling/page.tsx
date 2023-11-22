@@ -1,13 +1,13 @@
 "use client";
 import { Typography, TypographyVariant } from "@/components/atoms/Typography";
 import { Button, ButtonVariant } from "@/components/atoms/Button";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, RefObject, useEffect, useRef, useState } from "react";
 import GenerateButton from "@/components/molecules/GenerateButton";
 import ResultText from "@/components/molecules/ResultText";
 import ImageResults from "@/components/molecules/ImageResults";
 import useTextGeneration from "@/app/(dashboard)/chatbot/useTextGeneration";
 import useImageGeneration from "@/app/(dashboard)/diffusion/useImageGeneration";
-import GeneratingModal from "@/components/molecules/GeneratingModal";
+import GeneratingCard from "@/components/molecules/GeneratingCard";
 import useLocalStorage from "@/hooks/useLocalStorage";
 
 interface StoryBookItem {
@@ -20,6 +20,7 @@ const basePrompt: string =
   "Write a story's first paragraph about a lost explorer discovering an ancient, hidden city.";
 
 export default function StorytellingPage() {
+  const scrollRef: RefObject<any> = useRef(null);
   const {
     generateText,
     results: textResults,
@@ -59,13 +60,20 @@ export default function StorytellingPage() {
       const storyBookCopy = [...storyBook];
       storyBookCopy[indexForImageGeneration].images = imageResults;
       setStoryBook(storyBookCopy);
+      window.scrollTo(0, document.body.scrollHeight);
     }
   }, [imageResults]);
 
   const handleGenerateImage = async (pageIndex: number) => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     setIndexForImageGeneration(pageIndex);
     const page = storyBook[pageIndex];
     await generateImage(page.text);
+  };
+
+  const handleGenerateText = async () => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    await generateText(prompt);
   };
 
   return (
@@ -76,37 +84,40 @@ export default function StorytellingPage() {
         Build a story with an artificial intelligence.
       </Typography>
 
-      <GenerateButton
-        onClick={() => generateText(prompt)}
-        promptValue={prompt}
-        setPromptValue={setPrompt}
-        disabled={!formValid}
-        loading={textLoading}
-      />
-
       <div className="relative flex flex-col flex-wrap">
         {storyBook.map((page: StoryBookItem, index: number) => (
           <Fragment key={index}>
             <ResultText text={page.text} className={"mb-0"} />
 
             {!page.images ? (
-              <Button
-                text={"Generate Image"}
-                btnClass={"mt-2 max-w-[180px]"}
-                variant={ButtonVariant.Primary}
-                disabled={imageLoading || !formValid}
-                className="btn btn-primary bt-5"
-                loading={imageLoading}
-                onClick={() => handleGenerateImage(index)}
-              />
+              !imageLoading && (
+                <Button
+                  text={"Generate Image"}
+                  btnClass={"mt-2 max-w-[180px]"}
+                  variant={ButtonVariant.Primary}
+                  disabled={imageLoading || !formValid}
+                  className="btn btn-primary bt-5"
+                  loading={imageLoading}
+                  onClick={() => handleGenerateImage(index)}
+                />
+              )
             ) : (
               <ImageResults images={page.images} />
             )}
           </Fragment>
         ))}
       </div>
+      <GeneratingCard open={textLoading || imageLoading} className="!mt-5" />
 
-      <GeneratingModal open={textLoading || imageLoading} />
+      <GenerateButton
+        onClick={handleGenerateText}
+        promptValue={prompt}
+        setPromptValue={setPrompt}
+        disabled={!formValid}
+        loading={textLoading}
+      />
+
+      <span className="mt-[500px] mb-[100px]" ref={scrollRef} />
     </section>
   );
 }

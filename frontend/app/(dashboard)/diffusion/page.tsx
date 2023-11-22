@@ -1,14 +1,17 @@
 "use client";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Typography, TypographyVariant } from "@/components/atoms/Typography";
 import GenerateButton from "@/components/molecules/GenerateButton";
 import UserPrompt from "@/components/molecules/UserPrompt";
 import ImageResults from "@/components/molecules/ImageResults";
-import GeneratingModal from "@/components/molecules/GeneratingModal";
+import GeneratingCard from "@/components/molecules/GeneratingCard";
 import useImageGeneration, {
   defaultConfig,
 } from "@/app/(dashboard)/diffusion/useImageGeneration";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { useModels } from "@/app/(dashboard)/ModelsContext";
+import { SelectModel } from "@/components/atoms/Select";
+import { Model } from "@/lib/models";
 
 interface GenerationItem {
   prompt: string;
@@ -16,10 +19,15 @@ interface GenerationItem {
 }
 
 export default function DiffusionPage() {
+  const scrollRef: RefObject<any> = useRef(null);
+  const { findValidModelsForCategory } = useModels();
   const { generateImage, loading, results } = useImageGeneration();
+
   const [prompt, setPrompt] = useState(defaultConfig.prompt);
   const [formValid, setFormValid] = useState(false);
   const [allResults, setAllResults] = useLocalStorage("diffusion", []);
+  const [selectedModel, setSelectedModel] = useState("");
+  const imageModels: Model[] = findValidModelsForCategory("text2img");
 
   useEffect(() => {
     if (prompt.length > 0) {
@@ -37,23 +45,29 @@ export default function DiffusionPage() {
     }
   }, [results]);
 
+  const handleGenerateImage = async () => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    await generateImage(prompt, selectedModel);
+  };
+
   return (
     <section className="main-section">
-      <Typography variant={TypographyVariant.Title}>
-        Image generation
-      </Typography>
+      <div className="flex flex-row justify-between items-end">
+        <div>
+          <Typography variant={TypographyVariant.Title}>
+            Image generation
+          </Typography>
 
-      <Typography variant={TypographyVariant.Paragraph}>
-        Write your ideas and generate pictures from them.
-      </Typography>
-
-      <GenerateButton
-        onClick={() => generateImage(prompt)}
-        promptValue={prompt}
-        setPromptValue={setPrompt}
-        disabled={!formValid}
-        loading={loading}
-      />
+          <Typography variant={TypographyVariant.Paragraph}>
+            Write your ideas and generate pictures from them.
+          </Typography>
+        </div>
+        <SelectModel
+          options={imageModels}
+          value={selectedModel}
+          setValue={setSelectedModel}
+        />
+      </div>
 
       <div className="flex flex-col">
         {allResults.map((result: GenerationItem, index: number) => (
@@ -66,8 +80,17 @@ export default function DiffusionPage() {
           </div>
         ))}
       </div>
+      <GeneratingCard open={loading} />
 
-      <GeneratingModal open={loading} />
+      <GenerateButton
+        onClick={handleGenerateImage}
+        promptValue={prompt}
+        setPromptValue={setPrompt}
+        disabled={!formValid}
+        loading={loading}
+      />
+
+      <span className="mt-[500px] mb-[100px]" ref={scrollRef} />
     </section>
   );
 }

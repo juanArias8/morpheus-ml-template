@@ -1,14 +1,17 @@
 "use client";
 import { Typography, TypographyVariant } from "@/components/atoms/Typography";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import GenerateButton from "@/components/molecules/GenerateButton";
 import ResultText from "@/components/molecules/ResultText";
 import UserPrompt from "@/components/molecules/UserPrompt";
-import GeneratingModal from "@/components/molecules/GeneratingModal";
+import GeneratingCard from "@/components/molecules/GeneratingCard";
 import useTextGeneration, {
   defaultConfig,
 } from "@/app/(dashboard)/chatbot/useTextGeneration";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { SelectModel } from "@/components/atoms/Select";
+import { useModels } from "@/app/(dashboard)/ModelsContext";
+import { Model } from "@/lib/models";
 
 interface ChatBotItem {
   prompt: string;
@@ -16,10 +19,17 @@ interface ChatBotItem {
 }
 
 export default function ChatBotPage() {
+  const scrollRef: RefObject<any> = useRef(null);
+  const { findValidModelsForCategory } = useModels();
   const { generateText, loading, results } = useTextGeneration();
+
   const [prompt, setPrompt] = useState(defaultConfig.prompt);
   const [formValid, setFormValid] = useState(false);
   const [allResults, setAllResults] = useLocalStorage("chatBot", []);
+  const [selectedModel, setSelectedModel] = useState("");
+  const imageModels: Model[] = findValidModelsForCategory(
+    "text-conversational",
+  );
 
   useEffect(() => {
     if (prompt.length > 0) {
@@ -37,23 +47,29 @@ export default function ChatBotPage() {
     }
   }, [results]);
 
+  const handleGenerateImage = async () => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    await generateText(prompt, selectedModel);
+  };
+
   return (
     <section className="main-section">
-      <Typography variant={TypographyVariant.Title}>
-        Text generation - ChatBot
-      </Typography>
+      <div className="flex flex-row justify-between items-end">
+        <div>
+          <Typography variant={TypographyVariant.Title}>
+            Text generation - ChatBot
+          </Typography>
 
-      <Typography variant={TypographyVariant.Paragraph}>
-        Chat with an artificial intelligence.
-      </Typography>
-
-      <GenerateButton
-        onClick={() => generateText(prompt)}
-        promptValue={prompt}
-        setPromptValue={setPrompt}
-        disabled={!formValid}
-        loading={loading}
-      />
+          <Typography variant={TypographyVariant.Paragraph}>
+            Chat with an artificial intelligence.
+          </Typography>
+        </div>
+        <SelectModel
+          options={imageModels}
+          value={selectedModel}
+          setValue={setSelectedModel}
+        />
+      </div>
 
       <div className="mt-10 flex flex-col flex-wrap">
         {allResults.map((item: ChatBotItem, index: number) => (
@@ -65,7 +81,17 @@ export default function ChatBotPage() {
         ))}
       </div>
 
-      <GeneratingModal open={loading} />
+      <GeneratingCard open={loading} />
+
+      <GenerateButton
+        onClick={handleGenerateImage}
+        promptValue={prompt}
+        setPromptValue={setPrompt}
+        disabled={!formValid}
+        loading={loading}
+      />
+
+      <span className="mt-[500px] mb-[100px]" ref={scrollRef} />
     </section>
   );
 }
