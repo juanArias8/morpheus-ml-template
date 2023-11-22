@@ -98,7 +98,7 @@ const fetchDataWithRetry = async (
 
 const mapCounterToSleepTime = (counter: number) => {
   if (counter <= 5) return 1000;
-  if (counter <= 10) return 2000;
-  if (counter <= 20) return 3000;
-  return 5000;
+  if (counter <= 10) return 500;
+  if (counter <= 20) return 1000;
+  return 2000;
 };
